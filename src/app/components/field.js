@@ -40,6 +40,8 @@ export const Field = ({ match }) => {
 
           return (
             <div
+              id="button"
+              onClick={() => {}}
               style={{
                 top: scaledY,
                 left: scaledX,
