@@ -1,4 +1,5 @@
 "use client";
+import { Field } from "@/app/components/field";
 import { Stats } from "@/app/components/stats";
 import { Timeline } from "@/app/components/timeline";
 import { matches } from "@/app/data";
@@ -27,7 +28,7 @@ export default function Match() {
     {
       key: "2",
       label: "Atış Grafiği",
-      children: "Content of Tab Pane 2",
+      children: <Field match={matchData} />,
     },
     {
       key: "3",
