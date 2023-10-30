@@ -3,13 +3,13 @@ import { useRouter } from "next/navigation";
 import { matches } from "./data";
 
 export default function Home() {
-  const fixtures = matches.data.team.fixtures.items;
   const router = useRouter();
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <h1 className="text-4xl font-bold mb-8">Maçlar</h1>
-      {fixtures.map((fixture, index) => {
+      {matches.map((match, index) => {
+        const fixture = match.fixture;
         const date = new Date(fixture.startTimeLocal);
 
         const formattedDate = date.toLocaleDateString("tr-TR", {
