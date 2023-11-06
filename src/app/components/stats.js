@@ -1,5 +1,5 @@
 import { Table } from "antd";
-const headers = [
+export const headers = [
   {
     key: "bib",
     name: "#",
@@ -7,21 +7,6 @@ const headers = [
   {
     key: "name",
     name: "Name",
-  },
-  {
-    code: "Başarılı Atış Girişimi",
-    key: "fieldGoalsMade",
-    name: "BAG",
-  },
-  {
-    code: "Atış Girişimi",
-    key: "fieldGoalsAttempted",
-    name: "AG",
-  },
-  {
-    code: "Atış Girişimi Yüzdesi",
-    key: "fieldGoalsPercentage",
-    name: "AGY",
   },
   {
     code: "İki Sayı Başarılı",
@@ -93,11 +78,6 @@ const headers = [
     key: "foulsTotal",
     name: "FA",
   },
-  {
-    code: "Sayı",
-    key: "points",
-    name: "SY",
-  },
 ];
 
 export const Stats = ({ match }) => {
@@ -113,6 +93,7 @@ export const Stats = ({ match }) => {
     return {
       ...item,
       ...item.statistics,
+      key: item.personId,
     };
   });
 
@@ -120,6 +101,7 @@ export const Stats = ({ match }) => {
     return {
       ...item,
       ...item.statistics,
+      key: item.personId,
     };
   });
 

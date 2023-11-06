@@ -63,7 +63,7 @@ export const Field = ({ match }) => {
         }}
         onCancel={handleCancelShot}
         title="Shot Info"
-        visible={isModalOpenShot}
+        open={isModalOpenShot}
       >
         {selectedShot && selectedPlayer && selectedTeam && (
           <div
