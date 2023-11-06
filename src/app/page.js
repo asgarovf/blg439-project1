@@ -1,14 +1,242 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { matches } from "./data";
+import { Button, Input, Modal, Select, Typography } from "antd";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
+import { addNewMatch, buildMatch } from "./store/matchSlicer";
+
+export const getTeams = () => {
+  const teams = [];
+  matches.forEach((item) => {
+    if (
+      teams.find((i) => i.entityId == item.fixture.competitors[0].entityId) ==
+      null
+    ) {
+      const team = {
+        ...item.fixture.competitors[0],
+        score: "0",
+      };
+      teams.push(team);
+    }
+    if (
+      teams.find((i) => i.entityId == item.fixture.competitors[1].entityId) ==
+      null
+    ) {
+      const team = {
+        ...item.fixture.competitors[1],
+        score: "0",
+      };
+      teams.push(team);
+    }
+  });
+  return teams;
+};
+
+export const getPlayers = () => {
+  const players = [];
+  const allPersons = [];
+
+  matches.forEach((item) => {
+    const allPlayersInMatch = item.statistics.home.persons.concat(
+      item.statistics.away.persons
+    );
+    allPersons.push(...allPlayersInMatch);
+  });
+
+  allPersons.forEach((item) => {
+    if (players.find((player) => player.personId == item.personId) == null) {
+      const newPlayer = {
+        ...item,
+        statistics: {},
+      };
+      players.push(newPlayer);
+    }
+  });
+  return players;
+};
 
 export default function Home() {
+  const matchList = useSelector((state) => state.matchSlicer.matches);
   const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [team1, setTeam1] = useState(null);
+  const [team2, setTeam2] = useState(null);
+  const [venue, setVenue] = useState("");
+  const dispatch = useDispatch();
+
+  const buildInitialMatchData = () => {
+    const teams = getTeams();
+    const home = teams.find((item) => {
+      return item.entityId == team1;
+    });
+    const away = teams.find((item) => item.entityId == team2);
+    const players = getPlayers();
+
+    const homePersons = players.filter((item) => {
+      return item.entityId === home.entityId;
+    });
+
+    const awayPersons = players.filter((item) => {
+      return item.entityId === away.entityId;
+    });
+
+    const matchData = {
+      isCustom: true,
+      fixture: {
+        competitors: [home, away],
+        venue,
+        fixtureId: uuidv4(),
+        startTimeLocal: new Date().toISOString(),
+      },
+      seasonId: uuidv4(),
+      periodData: {
+        periodLabels: {
+          1: "Ç1",
+          2: "Ç2",
+          3: "Ç3",
+          4: "Ç4",
+          11: "UZ1",
+          12: "UZ2",
+          13: "UZ3",
+          14: "UZ4",
+          15: "UZ5",
+          16: "UZ6",
+        },
+        teamScores: {
+          [home.entityId]: [
+            {
+              periodId: 1,
+              score: 0,
+            },
+            {
+              periodId: 2,
+              score: 0,
+            },
+            {
+              periodId: 3,
+              score: 0,
+            },
+            {
+              periodId: 4,
+              score: 0,
+            },
+          ],
+          [away.entityId]: [
+            {
+              periodId: 1,
+              score: 0,
+            },
+            {
+              periodId: 2,
+              score: 0,
+            },
+            {
+              periodId: 3,
+              score: 0,
+            },
+            {
+              periodId: 4,
+              score: 0,
+            },
+          ],
+        },
+      },
+      statistics: {
+        headers: [],
+        entitiesLabels: [],
+        boxScoreLabels: {},
+        home: {
+          persons: homePersons,
+        },
+        away: {
+          persons: awayPersons,
+        },
+      },
+      shotChart: {
+        competitors: {},
+        persons: {},
+        shots: [],
+      },
+      pbp: {
+        1: {
+          ended: true,
+          events: [],
+        },
+        2: {
+          ended: true,
+          events: [],
+        },
+        3: {
+          ended: true,
+          events: [],
+        },
+        4: {
+          ended: true,
+          events: [],
+        },
+      },
+    };
+    return matchData;
+  };
+
+  const getTeamOptions = getTeams().map((team) => {
+    return { label: team.name, value: team.entityId };
+  });
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center justify-between p-24 pt-10">
+      <Modal
+        okButtonProps={{
+          disabled: team1 == null || team2 == null || team1 == team2,
+        }}
+        onOk={() => {
+          const matchData = buildInitialMatchData();
+          dispatch(buildMatch(matchData));
+          dispatch(addNewMatch(matchData));
+          setIsModalOpen(false);
+        }}
+        okText="Continue"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+      >
+        <Typography.Title level={2}>Yeni Maç Oluştur</Typography.Title>
+        <Select
+          size="large"
+          value={team1?.entityId}
+          placeholder="1. Takım Seçiniz"
+          className="w-full mt-4"
+          options={getTeamOptions}
+          onChange={(e) => {
+            setTeam1(e);
+          }}
+          optionLabelProp="label"
+        />
+        <Select
+          size="large"
+          value={team2?.entityId}
+          placeholder="2. Takım Seçiniz"
+          className="mt-2 w-full"
+          options={getTeamOptions}
+          onChange={(e) => {
+            setTeam2(e);
+          }}
+          optionLabelProp="label"
+        />
+        <Input
+          size="large"
+          className="mt-2"
+          placeholder="Lokasyon"
+          value={venue}
+          onChange={(e) => setVenue(e.target.value)}
+        />
+      </Modal>
+      <Button className="mb-2" onClick={() => setIsModalOpen(true)}>
+        Yeni Maç
+      </Button>
       <h1 className="text-4xl font-bold mb-8">Maçlar</h1>
-      {matches.map((match, index) => {
+      {matchList.map((match, index) => {
         const fixture = match.fixture;
         const date = new Date(fixture.startTimeLocal);
 

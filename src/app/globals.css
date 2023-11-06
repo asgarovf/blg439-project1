@@ -8,6 +8,21 @@
   --background-end-rgb: 255, 255, 255;
 }
 
+.ant-btn-primary {
+  background-color: #1677ff;
+}
+.ant-btn-primary:hover {
+  background-color: #4096ff;
+}
+.ant-btn-primary:active {
+  background-color: #0958d9;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
 body {
   background-color: white;
 }
