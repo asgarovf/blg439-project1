@@ -161,7 +161,9 @@ export default function Match() {
               })}
             </Select>
             <Checkbox
-              onChange={(e) => setSuccess(e.target.value)}
+              onChange={(e) => {
+                setSuccess(e.target.checked);
+              }}
               value={success}
             >
               Başarılı
