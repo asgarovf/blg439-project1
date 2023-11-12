@@ -1,4 +1,6 @@
 import { Table } from "antd";
+import { players } from "../data/players";
+
 export const headers = [
   {
     key: "bib",
@@ -107,6 +109,32 @@ export const Stats = ({ match }) => {
 
   ////////////////////////////////////////////////////////////////////////////
   const pbpData = match.pbp;
+  const initialPlayerStatistics = {
+    assists: 0,
+    blocks: 0,
+    efficiency: 0,
+    fieldGoalsAttempted: 0,
+    fieldGoalsMade: 0,
+    foulsDrawn: 0,
+    foulsTotal: 0,
+    freeThrowsAttempted: 0,
+    freeThrowsMade: 0,
+    freeThrowsPercentage: 0,
+    minutes: "PT0M",
+    plusMinus: null,
+    points: 0,
+    pointsThreeAttempted: 0,
+    pointsThreeMade: 0,
+    pointsThreePercentage: 0,
+    pointsTwoAttempted: 0,
+    pointsTwoMade: 0,
+    pointsTwoPercentage: 0,
+    rebounds: 0,
+    reboundsDefensive: 0,
+    reboundsOffensive: 0,
+    steals: 0,
+    turnovers: 0,
+  };
 
   function generateStatisticsFromPBP(pbpData) {
     const statistics = {
@@ -149,84 +177,75 @@ export const Stats = ({ match }) => {
       },
     };
 
-    // Iterate through each event in the pbpData
     pbpData[1].events.forEach(event => {
-      // Assuming the event data contributes to player statistics (omitting actual calculations for brevity)
 
-      // For each player in the 'persons' array
-      let player = match.statistics.away.persons.find(person => person.personId === event.personId);
+      let player = players.find(person => person.personId === event.personId);
 
-      // Similar updates for other player-specific stats based on event data
       if (!player) {
-        player = match.statistics.home.persons.find(person => person.personId === event.personId);
+        return;
       }
 
-      const playerStats = { ...player.statistics };
+      if (!player.statistics) {
+        player.statistics = { ...initialPlayerStatistics };
+      }
 
       if (event.desc.includes("Asist")) {
-        playerStats.assists++;
+        player.statistics.assists++;
       } else if (event.desc.includes("Blok")) {
-        playerStats.blocks++;
+        player.statistics.blocks++;
       } else if (event.desc === "Kişisel Faul" || event.desc === "Hücum Faul") {
-        playerStats.foulsDrawn++;
-        playerStats.foulsTotal++;
+        player.statistics.foulsDrawn++;
+        player.statistics.foulsTotal++;
       } else if (event.desc === "Alınan Faul") {
-        playerStats.foulsTotal++;
+        player.statistics.foulsTotal++;
       } else if (event.desc.includes("Top Çalma")) {
-        playerStats.steals++;
+        player.statistics.steals++;
       } else if (event.desc.includes("Top Kaybı")) {
-        playerStats.turnovers++;
+        player.statistics.turnovers++;
       } else if (event.desc.includes("2 Sayı")) {
-        playerStats.pointsTwoAttempted++;
-        playerStats.fieldGoalsAttempted++;
+        player.statistics.pointsTwoAttempted++;
+        player.statistics.fieldGoalsAttempted++;
         if (event.success === true) {
-          playerStats.pointsTwoMade++;
-          playerStats.fieldGoalsMade++;
-          playerStats.points += 2;
+          player.statistics.pointsTwoMade++;
+          player.statistics.fieldGoalsMade++;
+          player.statistics.points += 2;
         }
-        playerStats.pointsTwoPercentage = (playerStats.pointsTwoMade / playerStats.pointsTwoAttempted) * 100;
-        playerStats.fieldGoalsPercentage = (playerStats.fieldGoalsMade / playerStats.fieldGoalsAttempted) * 100;
+        player.statistics.pointsTwoPercentage = (player.statistics.pointsTwoMade / player.statistics.pointsTwoAttempted) * 100;
+        player.statistics.fieldGoalsPercentage = (player.statistics.fieldGoalsMade / player.statistics.fieldGoalsAttempted) * 100;
       } else if (event.desc.includes("3 Sayı")) {
-        playerStats.pointsThreeAttempted++;
-        playerStats.fieldGoalsAttempted++;
+        player.statistics.pointsThreeAttempted++;
+        player.statistics.fieldGoalsAttempted++;
         if (event.success === true) {
-          playerStats.pointsThreeMade++;
-          playerStats.fieldGoalsMade++;
-          playerStats.points += 3;
+          player.statistics.pointsThreeMade++;
+          player.statistics.fieldGoalsMade++;
+          player.statistics.points += 3;
         }
-        playerStats.pointsThreePercentage = (playerStats.pointsThreeMade / playerStats.pointsThreeAttempted) * 100;
-        playerStats.fieldGoalsPercentage = (playerStats.fieldGoalsMade / playerStats.fieldGoalsAttempted) * 100;
+        player.statistics.pointsThreePercentage = (player.statistics.pointsThreeMade / player.statistics.pointsThreeAttempted) * 100;
+        player.statistics.fieldGoalsPercentage = (player.statistics.fieldGoalsMade / player.statistics.fieldGoalsAttempted) * 100;
       } else if (event.desc.includes("Serbest Atış")) {
-        playerStats.freeThrowsAttempted++;
+        player.statistics.freeThrowsAttempted++;
         if (event.success === true) {
-          playerStats.freeThrowsMade++;
-          playerStats.points++;
+          player.statistics.freeThrowsMade++;
+          player.statistics.points++;
         }
-        playerStats.freeThrowsPercentage = (playerStats.freeThrowsMade / playerStats.freeThrowsAttempted) * 100;
+        player.statistics.freeThrowsPercentage = (player.statistics.freeThrowsMade / player.statistics.freeThrowsAttempted) * 100;
       } else if (event.desc.includes("Ribaund")) {
-        playerStats.rebounds++;
+        player.statistics.rebounds++;
         if (event.desc.includes("Savunma")) {
-          playerStats.reboundsDefensive++;
+          player.statistics.reboundsDefensive++;
         } else if (event.desc.includes("Hücum")) {
-          playerStats.reboundsOffensive++;
+          player.statistics.reboundsOffensive++;
         }
       }
-      playerStats.efficiency = (playerStats.points * 1.0) + (playerStats.fieldGoalsMade * 0.4) + (playerStats.fieldGoalsAttempted * -0.7) + ((playerStats.freeThrowsAttempted - playerStats.freeThrowsMade) * -0.4) + (playerStats.reboundsOffensive * 0.7) + (playerStats.reboundsDefensive * 0.3) + (playerStats.steals * 1.0) + (playerStats.assists * 0.7) + (playerStats.blocks * 0.7) + (playerStats.foulsTotal * -0.4) + (playerStats.turnovers * -1.0);
-
-      player = {
-        ...player,
-        statistics: {
-          ...playerStats,
-        },
-      };
+      player.statistics.efficiency = (player.statistics.points * 1.0) + (player.statistics.fieldGoalsMade * 0.4) +
+        (player.statistics.fieldGoalsAttempted * -0.7) + ((player.statistics.freeThrowsAttempted - player.statistics.freeThrowsMade) * -0.4)
+        + (player.statistics.reboundsOffensive * 0.7) + (player.statistics.reboundsDefensive * 0.3) + (player.statistics.steals * 1.0)
+        + (player.statistics.assists * 0.7) + (player.statistics.blocks * 0.7) + (player.statistics.foulsTotal * -0.4) + (player.statistics.turnovers * -1.0);
 
     });
 
-    return statistics;
+    return player.statistics;
   }
-
-  const transformedData = generateStatisticsFromPBP(pbpData);
-  console.log(transformedData);
 
   return (
     <div className="w-full overflow-auto">
