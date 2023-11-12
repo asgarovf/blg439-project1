@@ -55,6 +55,12 @@ export const matchSlicer = createSlice({
         } catch (err) {
           console.error(err);
         }
+      } else {
+        try {
+          state.matches[matchIndex].pbp[event.periodId].events.push(event);
+        } catch (err) {
+          console.error(err);
+        }
       }
     },
   },

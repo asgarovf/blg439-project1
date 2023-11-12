@@ -105,7 +105,6 @@ export default function Match() {
               x: coordinates.x,
               y: coordinates.y,
             };
-            console.log(newShot);
             dispatch(
               addEvent({
                 matchId: matchData.seasonId,
