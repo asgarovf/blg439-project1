@@ -1,4 +1,5 @@
 import { List, Tabs } from "antd";
+import { players } from "../data/players";
 
 export const Timeline = ({ match }) => {
   const dataSourceQuarters = Object.keys(match.pbp);
@@ -31,9 +32,6 @@ const ListView = ({ match, events }) => {
   match.fixture.competitors.forEach((item, index) => {
     competitorsById[item.entityId] = { ...item, index };
   });
-  const allPersons = match.statistics.home.persons.concat(
-    match.statistics.away.persons
-  );
 
   return (
     <List
@@ -45,7 +43,7 @@ const ListView = ({ match, events }) => {
         const logo = competitor?.logo;
         const index = competitor?.index;
 
-        const person = allPersons.find((person) => {
+        const person = players.find((person) => {
           return person.personId === item.personId;
         });
 
