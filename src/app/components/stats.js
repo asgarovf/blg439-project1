@@ -1,4 +1,6 @@
 import { Table } from "antd";
+import { players } from "../data/players";
+
 export const headers = [
   {
     key: "bib",

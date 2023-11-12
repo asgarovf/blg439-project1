@@ -4,10 +4,11 @@ import { Field } from "@/app/components/field";
 import { Stats } from "@/app/components/stats";
 import { Timeline } from "@/app/components/timeline";
 import { eventOptions } from "@/app/const";
+import { players } from "@/app/data/players";
 import { addEvent } from "@/app/store/matchSlicer";
 import { Button, Checkbox, Input, Modal, Select, Tabs, Typography } from "antd";
 import { useParams, useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import useResizeObserver from "use-resize-observer";
 
@@ -42,10 +43,12 @@ export default function Match() {
     return periodData.teamScores[key];
   });
 
-  const getPlayerOptions = () => {
-    return matchData.statistics.home.persons.concat(
-      matchData.statistics.away.persons
-    );
+  const getHomePlayerOptions = () => {
+    return matchData.statistics.home.persons;
+  };
+
+  const getAwayPlayerOptions = () => {
+    return matchData.statistics.away.persons;
   };
 
   const items = [
@@ -66,6 +69,13 @@ export default function Match() {
     },
   ];
 
+  const rawPlayer = useMemo(() => {
+    if (player == null) {
+      return null;
+    }
+    return players.find((item) => item.personId === player);
+  }, [player]);
+
   return (
     <div className="pt-10 flex flex-col items-center max-w-[1280px] mx-auto">
       <Modal
@@ -81,7 +91,7 @@ export default function Match() {
               bib: "9",
               clock: `PT${minute}M${seconds}S`,
               desc: eventOption.code,
-              entityId: "af7e4c88-32c2-11ed-b619-7bbcc08f45bf",
+              entityId: rawPlayer?.entityId,
               eventType: eventOption.key,
               name: "",
               periodId: quarter,
@@ -95,6 +105,7 @@ export default function Match() {
               x: coordinates.x,
               y: coordinates.y,
             };
+            console.log(newShot);
             dispatch(
               addEvent({
                 matchId: matchData.seasonId,
@@ -114,7 +125,7 @@ export default function Match() {
         }}
         cancelText="Geri"
         okText="İleri"
-        width={step === 1 ? "90%" : 640}
+        width={"90%"}
         onCancel={() => {
           if (step === 1) {
             setStep(0);
@@ -126,40 +137,74 @@ export default function Match() {
       >
         <Typography.Title level={3}>Veri Girişi</Typography.Title>
         {step === 0 ? (
-          <div className="flex flex-col space-y-4">
-            <Select
-              onChange={(e) => {
-                setEvent(e);
-              }}
-              placeholder="Aktivite"
-              className="min-w-[400px]"
-              options={eventOptions.map((item) => {
-                return { value: item.key, label: item.code, key: item.key };
-              })}
-            />
-            <Select
-              onChange={(e) => {
-                setPlayer(e);
-              }}
-              value={player?.personId}
-              placeholder="Oyuncu"
-              className="min-w-[400px]"
-              optionLabelProp="label"
-            >
-              {getPlayerOptions().map((player, index) => {
-                const value = player.name ?? player?.personName;
-                const label = `${player.bib} - ${value}`;
-                return (
-                  <Select.Option
-                    label={label}
-                    value={player.personId}
-                    key={index}
-                  >
-                    {label}
-                  </Select.Option>
-                );
-              })}
-            </Select>
+          <div className="flex flex-col items-center space-y-4">
+            <div className="flex space-x-4 justify-center align-center">
+              {eventOptions.map((item, index) => (
+                <div
+                  onClick={() => {
+                    setEvent(item.key);
+                  }}
+                  className={`min-h-[32px] text-center cursor-pointer min-w-[64px] p-2 border-2 rounded-lg border-neutral-800  flex justify-center ${
+                    event === item.key ? "bg-blue-300" : "bg-neutral-0"
+                  } `}
+                  key={index}
+                >
+                  {item.code}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex">
+              <div className="flex flex-col space-x-4 shrink-0 w-1/2">
+                <p className="text-lg font-bold mb-3">{competitor1?.name}</p>
+                <div className="flex flex-wrap items-center justify-center">
+                  {getHomePlayerOptions()
+                    .slice(0, 5)
+                    .map((p, index) => (
+                      <div
+                        onClick={() => {
+                          setPlayer(p.personId);
+                        }}
+                        key={index}
+                        className={`mr-4 mb-4 flex shrink-0 flex-col border-neutral-400 border-2 p-2 rounded-lg justify-center items-center ${
+                          p.personId === player ? "bg-blue-300" : ""
+                        }`}
+                      >
+                        <img alt="" src={p.personImage} className="w-[60px]" />
+                        <p className="font-bold">
+                          {p.bib} - {p.personName}
+                        </p>
+                      </div>
+                    ))}
+                </div>
+              </div>
+              <div className="flex flex-col space-x-4 shrink-0 w-1/2">
+                <p className="text-lg flex mb-3 font-bold">
+                  {competitor2?.name}
+                </p>
+                <div className="flex flex-wrap items-center justify-center">
+                  {getAwayPlayerOptions()
+                    .slice(0, 5)
+                    .map((p, index) => (
+                      <div
+                        onClick={() => {
+                          setPlayer(p.personId);
+                        }}
+                        key={index}
+                        className={`mr-4 mb-4 flex shrink-0 flex-col border-neutral-400 border-2 p-2 rounded-lg justify-center items-center ${
+                          p.personId === player ? "bg-blue-300" : ""
+                        }`}
+                      >
+                        <img alt="" src={p.personImage} className="w-[60px]" />
+                        <p>
+                          {p.bib} - {p.personName}
+                        </p>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+
             <Checkbox
               onChange={(e) => {
                 setSuccess(e.target.checked);
@@ -170,34 +215,64 @@ export default function Match() {
             </Checkbox>
 
             <Typography.Text>Çeyrek</Typography.Text>
-            <Select
+            {/* <Select
               onChange={(e) => {
                 setQuarter(e);
               }}
               value={quarter}
               placeholder="Çeyrek"
               className="min-w-[400px]"
-              options={[
-                { value: 1, label: 1 },
-                { value: 2, label: 2 },
-                { value: 3, label: 3 },
-                { value: 4, label: 4 },
-              ]}
-            />
+              options={}
+            /> */}
+            <div className="flex space-x-4">
+              {[1, 2, 3, 4].map((item, index) => (
+                <div
+                  onClick={() => {
+                    setQuarter(item);
+                  }}
+                  className={`min-h-[32px] text-center cursor-pointer min-w-[64px] p-2 border-2 rounded-lg border-neutral-800  flex justify-center ${
+                    quarter === item ? "bg-blue-300" : "bg-neutral-0"
+                  } `}
+                  key={index}
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
 
             <Typography.Text>Kalan Dakika</Typography.Text>
-            <Input
-              type="number"
-              value={minute}
-              onChange={(e) => setMinutes(e.target.value)}
-            />
+            <div className="flex space-x-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((item, index) => (
+                <div
+                  onClick={() => {
+                    setMinutes(item);
+                  }}
+                  className={`min-h-[32px] text-center cursor-pointer min-w-[64px] p-2 border-2 rounded-lg border-neutral-800  flex justify-center ${
+                    minute === item ? "bg-blue-300" : "bg-neutral-0"
+                  } `}
+                  key={index}
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
 
             <Typography.Text>Kalan Saniye</Typography.Text>
-            <Input
-              type="number"
-              value={seconds}
-              onChange={(e) => setSeconds(e.target.value)}
-            />
+            <div className="flex flex-wrap">
+              {new Array(60).fill(0).map((item, index) => (
+                <div
+                  onClick={() => {
+                    setSeconds(index);
+                  }}
+                  className={`min-h-[32px] mr-2 mb-2 text-center cursor-pointer min-w-[64px] p-2 border-2 rounded-lg border-neutral-800  flex justify-center ${
+                    seconds === index ? "bg-blue-300" : "bg-neutral-0"
+                  } `}
+                  key={index}
+                >
+                  {index}
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <>
