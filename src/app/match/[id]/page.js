@@ -3,7 +3,8 @@
 import { Field } from "@/app/components/field";
 import { Stats } from "@/app/components/stats";
 import { Timeline } from "@/app/components/timeline";
-import { addShot } from "@/app/store/matchSlicer";
+import { eventOptions } from "@/app/const";
+import { addEvent } from "@/app/store/matchSlicer";
 import { Button, Checkbox, Input, Modal, Select, Tabs, Typography } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
@@ -17,8 +18,8 @@ export default function Match() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [step, setStep] = useState(0);
   const [event, setEvent] = useState("");
-  const [quarter, setQuarter] = useState(0);
-  const [minute, setMinutes] = useState(0);
+  const [quarter, setQuarter] = useState(1);
+  const [minute, setMinutes] = useState(12);
   const [seconds, setSeconds] = useState(0);
   const [player, setPlayer] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -68,28 +69,36 @@ export default function Match() {
   return (
     <div className="pt-10 flex flex-col items-center max-w-[1280px] mx-auto">
       <Modal
+        okButtonProps={{
+          disabled: player == null || event == null,
+        }}
         onOk={() => {
           if (step === 0) {
             setStep(1);
           } else {
+            const eventOption = eventOptions.find((item) => item.key === event);
             const newShot = {
               bib: "9",
-              clock: `PT${minute}${seconds}S`,
-              desc: event,
+              clock: `PT${minute}M${seconds}S`,
+              desc: eventOption.code,
               entityId: "af7e4c88-32c2-11ed-b619-7bbcc08f45bf",
-              eventType: "2pt",
+              eventType: eventOption.key,
               name: "",
-              periodId: periodData,
+              periodId: quarter,
               personId: player,
               success: success,
               successString: "",
+              scores: {
+                [competitor1.entityId]: 0,
+                [competitor2.entityId]: 0,
+              },
               x: coordinates.x,
               y: coordinates.y,
             };
             dispatch(
-              addShot({
+              addEvent({
                 matchId: matchData.seasonId,
-                shot: newShot,
+                event: newShot,
               })
             );
             setIsModalVisible(false);
@@ -124,15 +133,9 @@ export default function Match() {
               }}
               placeholder="Aktivite"
               className="min-w-[400px]"
-              options={[
-                { value: "2 sayı", label: "2 sayı" },
-                { value: "3 sayı", label: "3 sayı" },
-                { value: "Serbest Atış 1/2", label: "Serbest Atış 1/2" },
-                {
-                  value: "Serbest Atış 2/2",
-                  label: "Serbest Atış 2/2",
-                },
-              ]}
+              options={eventOptions.map((item) => {
+                return { value: item.key, label: item.code, key: item.key };
+              })}
             />
             <Select
               onChange={(e) => {
@@ -157,7 +160,12 @@ export default function Match() {
                 );
               })}
             </Select>
-            <Checkbox onChange={(e) => setSuccess(e)} value={success}>
+            <Checkbox
+              onChange={(e) => {
+                setSuccess(e.target.checked);
+              }}
+              value={success}
+            >
               Başarılı
             </Checkbox>
 
@@ -199,7 +207,6 @@ export default function Match() {
                 let bounds = wrapperRef.current.getBoundingClientRect();
                 let x = e.clientX - bounds.left;
                 let y = Math.abs(bounds.top - e.clientY);
-                console.log(height, (y * 100) / height);
                 setCoordinates({
                   x: (x * 100) / width,
                   y: ((height - y) * 100) / height,

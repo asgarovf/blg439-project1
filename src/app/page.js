@@ -6,56 +6,8 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import { addNewMatch, buildMatch } from "./store/matchSlicer";
-
-export const getTeams = () => {
-  const teams = [];
-  matches.forEach((item) => {
-    if (
-      teams.find((i) => i.entityId == item.fixture.competitors[0].entityId) ==
-      null
-    ) {
-      const team = {
-        ...item.fixture.competitors[0],
-        score: "0",
-      };
-      teams.push(team);
-    }
-    if (
-      teams.find((i) => i.entityId == item.fixture.competitors[1].entityId) ==
-      null
-    ) {
-      const team = {
-        ...item.fixture.competitors[1],
-        score: "0",
-      };
-      teams.push(team);
-    }
-  });
-  return teams;
-};
-
-export const getPlayers = () => {
-  const players = [];
-  const allPersons = [];
-
-  matches.forEach((item) => {
-    const allPlayersInMatch = item.statistics.home.persons.concat(
-      item.statistics.away.persons
-    );
-    allPersons.push(...allPlayersInMatch);
-  });
-
-  allPersons.forEach((item) => {
-    if (players.find((player) => player.personId == item.personId) == null) {
-      const newPlayer = {
-        ...item,
-        statistics: {},
-      };
-      players.push(newPlayer);
-    }
-  });
-  return players;
-};
+import { players } from "./data/players";
+import { teams } from "./data/teams";
 
 export default function Home() {
   const matchList = useSelector((state) => state.matchSlicer.matches);
@@ -67,12 +19,10 @@ export default function Home() {
   const dispatch = useDispatch();
 
   const buildInitialMatchData = () => {
-    const teams = getTeams();
     const home = teams.find((item) => {
       return item.entityId == team1;
     });
     const away = teams.find((item) => item.entityId == team2);
-    const players = getPlayers();
 
     const homePersons = players.filter((item) => {
       return item.entityId === home.entityId;
@@ -181,7 +131,7 @@ export default function Home() {
     return matchData;
   };
 
-  const getTeamOptions = getTeams().map((team) => {
+  const getTeamOptions = teams.map((team) => {
     return { label: team.name, value: team.entityId };
   });
 
