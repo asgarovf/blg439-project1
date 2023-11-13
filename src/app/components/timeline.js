@@ -56,7 +56,12 @@ const ListView = ({ match, events }) => {
           <List.Item>
             <div className="w-full flex items-center justify-between">
               <div className={`${index === 0 ? "" : "opacity-0"}`}>
-                <p className="font-medium text-lg mb-2">{item.desc}</p>
+                <p className="font-medium text-lg mb-1">{item.desc}</p>
+                <p className="font-medium text-xs mb-3">
+                  {item.success != null && item.success
+                    ? "Başarılı"
+                    : "Başarısız"}
+                </p>
                 <div className="flex items-center">
                   <img
                     className="w-[32px] h-[32px] rounded-full mr-2"
@@ -76,7 +81,13 @@ const ListView = ({ match, events }) => {
                   index === 1 ? "flex flex-col items-end" : "opacity-0"
                 }`}
               >
-                <p className="font-medium text-lg mb-2">{item.desc}</p>
+                <p className="font-medium text-lg mb-1">{item.desc}</p>
+                {item.success != null && (
+                  <p className="font-medium text-xs mb-3">
+                    {item.success ? "Başarılı" : "Başarısız"}
+                  </p>
+                )}
+
                 <div className="flex items-center">
                   <img
                     className="w-[32px] h-[32px] rounded-full mr-2"
