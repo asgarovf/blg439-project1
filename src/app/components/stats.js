@@ -1,5 +1,6 @@
 import { Table } from "antd";
 import { players } from "../data/players";
+import { useEffect, useMemo } from "react";
 
 export const headers = [
   {
@@ -80,7 +81,16 @@ export const headers = [
     key: "foulsTotal",
     name: "FA",
   },
+  {
+    code: "Points",
+    key: "points",
+    name: "PT",
+  },
 ];
+
+const isEmpty = (obj) => {
+  return Object.keys(obj).length === 0 && obj.constructor === Object;
+};
 
 export const Stats = ({ match }) => {
   const columns = headers.map((item) => {
@@ -91,26 +101,9 @@ export const Stats = ({ match }) => {
     };
   });
 
-  const homeDataSource = match.statistics.home.persons.map((item) => {
-    return {
-      ...item,
-      ...item.statistics,
-      key: item.personId,
-    };
-  });
-
-  const awayDataSource = match.statistics.away.persons.map((item) => {
-    return {
-      ...item,
-      ...item.statistics,
-      key: item.personId,
-    };
-  });
-
   ////////////////////////////////////////////////////////////////////////////
-  const pbpData = match.pbp;
 
-  function generateStatisticsFromPBP(pbpData) {
+  function generateStatisticsFromPBP(pbpData, players) {
     const initialPlayerStatistics = {
       assists: 0,
       blocks: 0,
@@ -138,75 +131,200 @@ export const Stats = ({ match }) => {
       turnovers: 0,
     };
 
-    pbpData[1].events.forEach(event => {
+    const modifiedPlayers = [...players];
 
-      let player = players.find(person => person.personId === event.personId);
+    let allEvents = pbpData[1].events;
+    if (pbpData[2]?.events) {
+      allEvents = allEvents.concat(pbpData[2].events);
+    }
+    if (pbpData[3]?.events) {
+      allEvents = allEvents.concat(pbpData[3].events);
+    }
+    if (pbpData[4]?.events) {
+      allEvents = allEvents.concat(pbpData[4].events);
+    }
 
-      if (!player) {
+    allEvents.forEach((event) => {
+      let index = -1;
+      for (let i = 0; i < modifiedPlayers.length; i++) {
+        if (modifiedPlayers[i].personId === event.personId) {
+          index = i;
+          break;
+        }
+      }
+
+      if (index === -1) {
         return;
       }
 
-      if (!player.statistics) {
+      const player = { ...modifiedPlayers[index] };
+
+      if (isEmpty(player.statistics) || player.statistics == undefined) {
         player.statistics = { ...initialPlayerStatistics };
       }
 
       if (event.desc.includes("Asist")) {
-        player.statistics.assists++;
+        player.statistics = {
+          ...player.statistics,
+          assists: player.statistics.assists + 1,
+        };
       } else if (event.desc.includes("Blok")) {
-        player.statistics.blocks++;
+        player.statistics = {
+          ...player.statistics,
+          blocks: player.statistics.blocks + 1,
+        };
       } else if (event.desc === "Kişisel Faul" || event.desc === "Hücum Faul") {
-        player.statistics.foulsDrawn++;
-        player.statistics.foulsTotal++;
+        player.statistics = {
+          ...player.statistics,
+          foulsDrawn: player.statistics.foulsDrawn + 1,
+          foulsTotal: player.statistics.foulsTotal + 1,
+        };
       } else if (event.desc === "Alınan Faul") {
-        player.statistics.foulsTotal++;
+        player.statistics = {
+          ...player.statistics,
+          foulsTotal: player.statistics.foulsTotal + 1,
+        };
       } else if (event.desc.includes("Top Çalma")) {
-        player.statistics.steals++;
+        player.statistics = {
+          ...player.statistics,
+          steals: player.statistics.steals + 1,
+        };
       } else if (event.desc.includes("Top Kaybı")) {
-        player.statistics.turnovers++;
-      } else if (event.desc.includes("2 Sayı")) {
-        player.statistics.pointsTwoAttempted++;
-        player.statistics.fieldGoalsAttempted++;
-        if (event.success === true) {
-          player.statistics.pointsTwoMade++;
-          player.statistics.fieldGoalsMade++;
-          player.statistics.points += 2;
-        }
-        player.statistics.pointsTwoPercentage = (player.statistics.pointsTwoMade / player.statistics.pointsTwoAttempted) * 100;
-        player.statistics.fieldGoalsPercentage = (player.statistics.fieldGoalsMade / player.statistics.fieldGoalsAttempted) * 100;
-      } else if (event.desc.includes("3 Sayı")) {
-        player.statistics.pointsThreeAttempted++;
-        player.statistics.fieldGoalsAttempted++;
-        if (event.success === true) {
-          player.statistics.pointsThreeMade++;
-          player.statistics.fieldGoalsMade++;
-          player.statistics.points += 3;
-        }
-        player.statistics.pointsThreePercentage = (player.statistics.pointsThreeMade / player.statistics.pointsThreeAttempted) * 100;
-        player.statistics.fieldGoalsPercentage = (player.statistics.fieldGoalsMade / player.statistics.fieldGoalsAttempted) * 100;
+        player.statistics = {
+          ...player.statistics,
+          turnovers: player.statistics.turnovers + 1,
+        };
+      } else if (
+        event.desc.includes("İki Sayı") ||
+        event.desc.includes("2 Sayı")
+      ) {
+        const newPointsTwoAttempted = player.statistics.pointsTwoAttempted + 1;
+        const newPointsTwoMade = event.success
+          ? player.statistics.pointsTwoMade + 1
+          : player.statistics.pointsTwoMade;
+
+        const newFieldGoalsAttempted =
+          player.statistics.fieldGoalsAttempted + 1;
+
+        const newFieldGoalsMade = event.success
+          ? player.statistics.fieldGoalsMade + 1
+          : player.statistics.fieldGoalsMade;
+
+        player.statistics = {
+          ...player.statistics,
+          pointsTwoAttempted: newPointsTwoAttempted,
+          fieldGoalsAttempted: newFieldGoalsAttempted,
+          pointsTwoMade: newPointsTwoMade,
+          fieldGoalsMade: newFieldGoalsMade,
+          points: event.success
+            ? player.statistics.points + 2
+            : player.statistics.points,
+          pointsTwoPercentage: (newPointsTwoMade / newPointsTwoAttempted) * 100,
+          fieldGoalsPercentage:
+            (newFieldGoalsMade / newFieldGoalsAttempted) * 100,
+        };
+      } else if (
+        event.desc.includes("Üç Sayı") ||
+        event.desc.includes("3 Sayı")
+      ) {
+        const newPointsThreeAttempted =
+          player.statistics.pointsThreeAttempted + 1;
+        const newPointsThreeMade = event.success
+          ? player.statistics.pointsThreeMade + 1
+          : player.statistics.pointsThreeMade;
+
+        const newFieldGoalsAttempted =
+          player.statistics.fieldGoalsAttempted + 1;
+        const newFieldGoalsMade = event.success
+          ? player.statistics.fieldGoalsMade + 1
+          : player.statistics.fieldGoalsMade;
+
+        player.statistics = {
+          ...player.statistics,
+          pointsThreeAttempted: newPointsThreeAttempted,
+          fieldGoalsAttempted: newFieldGoalsAttempted,
+          pointsThreeMade: newPointsThreeMade,
+          fieldGoalsMade: newFieldGoalsMade,
+          points: event.success
+            ? player.statistics.points + 3
+            : player.statistics.points,
+          pointsThreePercentage:
+            (newPointsThreeMade / newPointsThreeAttempted) * 100,
+          fieldGoalsPercentage:
+            (newFieldGoalsMade / newFieldGoalsAttempted) * 100,
+        };
       } else if (event.desc.includes("Serbest Atış")) {
-        player.statistics.freeThrowsAttempted++;
-        if (event.success === true) {
-          player.statistics.freeThrowsMade++;
-          player.statistics.points++;
-        }
-        player.statistics.freeThrowsPercentage = (player.statistics.freeThrowsMade / player.statistics.freeThrowsAttempted) * 100;
+        const newFreeThrowsMade = event.success
+          ? player.statistics.freeThrowsMade + 1
+          : player.statistics.freeThrowsMade;
+        const newFreeThrowsAttempted =
+          player.statistics.freeThrowsAttempted + 1;
+        const newFieldGoalsAttempted =
+          player.statistics.fieldGoalsAttempted + 1;
+        const newFieldGoalsMade = event.success
+          ? player.statistics.fieldGoalsMade + 1
+          : player.statistics.fieldGoalsMade;
+
+        player.statistics = {
+          ...player.statistics,
+          freeThrowsAttempted: newFreeThrowsAttempted,
+          freeThrowsMade: newFreeThrowsMade,
+          points: event.success
+            ? player.statistics.points + 1
+            : player.statistics.point,
+          freeThrowsPercentage:
+            (newFreeThrowsMade / newFreeThrowsAttempted) * 100,
+          fieldGoalsPercentage:
+            (newFieldGoalsMade / newFieldGoalsAttempted) * 100,
+        };
       } else if (event.desc.includes("Ribaund")) {
-        player.statistics.rebounds++;
+        player.statistics = {
+          ...player.statistics,
+          rebounds: player.statistics.rebounds + 1,
+        };
         if (event.desc.includes("Savunma")) {
-          player.statistics.reboundsDefensive++;
+          player.statistics = {
+            ...player.statistics,
+            reboundsDefensive: player.statistics.reboundsDefensive + 1,
+          };
         } else if (event.desc.includes("Hücum")) {
-          player.statistics.reboundsOffensive++;
+          player.statistics = {
+            ...player.statistics,
+            reboundsOffensive: player.statistics.reboundsOffensive + 1,
+          };
         }
       }
-      player.statistics.efficiency = (player.statistics.points * 1.0) + (player.statistics.fieldGoalsMade * 0.4) +
-        (player.statistics.fieldGoalsAttempted * -0.7) + ((player.statistics.freeThrowsAttempted - player.statistics.freeThrowsMade) * -0.4)
-        + (player.statistics.reboundsOffensive * 0.7) + (player.statistics.reboundsDefensive * 0.3) + (player.statistics.steals * 1.0)
-        + (player.statistics.assists * 0.7) + (player.statistics.blocks * 0.7) + (player.statistics.foulsTotal * -0.4) + (player.statistics.turnovers * -1.0);
 
+      modifiedPlayers[index] = {
+        ...modifiedPlayers[index],
+        statistics: player.statistics,
+      };
     });
 
-    return player.statistics;
+    return modifiedPlayers;
   }
+
+  const homeDataSource = useMemo(() => {
+    const source = generateStatisticsFromPBP(
+      match.pbp,
+      match.statistics.home.persons
+    );
+
+    return source.map((item) => {
+      return { ...item, ...item.statistics, key: item.personId };
+    });
+  }, [match]);
+
+  const awayDataSource = useMemo(() => {
+    const source = generateStatisticsFromPBP(
+      match.pbp,
+      match.statistics.away.persons
+    );
+
+    return source.map((item) => {
+      return { ...item, ...item.statistics, key: item.personId };
+    });
+  }, [match]);
 
   return (
     <div className="w-full overflow-auto">

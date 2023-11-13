@@ -6,7 +6,7 @@ import { Timeline } from "@/app/components/timeline";
 import { eventOptions } from "@/app/const";
 import { players } from "@/app/data/players";
 import { addEvent } from "@/app/store/matchSlicer";
-import { Button, Checkbox, Input, Modal, Select, Tabs, Typography } from "antd";
+import { Button, Checkbox, Modal, Tabs, Typography } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,8 +20,8 @@ export default function Match() {
   const [step, setStep] = useState(0);
   const [event, setEvent] = useState("");
   const [quarter, setQuarter] = useState(1);
-  const [minute, setMinutes] = useState(12);
-  const [seconds, setSeconds] = useState(0);
+  const [minute, setMinutes] = useState(11);
+  const [seconds, setSeconds] = useState(59);
   const [player, setPlayer] = useState(null);
   const [success, setSuccess] = useState(false);
   const [coordinates, setCoordinates] = useState({
@@ -80,7 +80,9 @@ export default function Match() {
     <div className="pt-10 flex flex-col items-center max-w-[1280px] mx-auto">
       <Modal
         okButtonProps={{
-          disabled: player == null || event == null,
+          disabled:
+            (step === 1 && (player == null || event == null || event == "")) ||
+            (step == 0 && coordinates.x == 0 && coordinates.y == 0),
         }}
         onOk={() => {
           if (step === 0) {
@@ -111,14 +113,11 @@ export default function Match() {
                 event: newShot,
               })
             );
-            setIsModalVisible(false);
             setCoordinates({
               x: 0,
               y: 0,
             });
             setStep(0);
-            setMinutes(0);
-            setSeconds(0);
             setPlayer(null);
           }
         }}
@@ -135,7 +134,7 @@ export default function Match() {
         open={isModalVisible}
       >
         <Typography.Title level={3}>Veri Girişi</Typography.Title>
-        {step === 0 ? (
+        {step === 1 ? (
           <div className="flex flex-col items-center space-y-4">
             <div className="flex space-x-4 justify-center align-center">
               {eventOptions.map((item, index) => (
@@ -205,24 +204,15 @@ export default function Match() {
             </div>
 
             <Checkbox
+              checked={success}
               onChange={(e) => {
                 setSuccess(e.target.checked);
               }}
-              value={success}
             >
               Başarılı
             </Checkbox>
 
             <Typography.Text>Çeyrek</Typography.Text>
-            {/* <Select
-              onChange={(e) => {
-                setQuarter(e);
-              }}
-              value={quarter}
-              placeholder="Çeyrek"
-              className="min-w-[400px]"
-              options={}
-            /> */}
             <div className="flex space-x-4">
               {[1, 2, 3, 4].map((item, index) => (
                 <div
@@ -241,7 +231,7 @@ export default function Match() {
 
             <Typography.Text>Kalan Dakika</Typography.Text>
             <div className="flex space-x-4">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((item, index) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((item, index) => (
                 <div
                   onClick={() => {
                     setMinutes(item);
