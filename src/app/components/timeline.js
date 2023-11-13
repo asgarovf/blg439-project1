@@ -11,17 +11,35 @@ export const Timeline = ({ match }) => {
     dataSourceEvents.push(...events);
   });
 
+  const getSortedEvents = (events) => {
+    const _events = [...events];
+    return _events.sort((a, b) => {
+      if (a.clock < b.clock) {
+        return 1;
+      } else {
+        return -1;
+      }
+    });
+  };
+
   const tabs = dataSourceQuarters.map((item) => {
     return {
       key: item,
       label: `Q${item}`,
-      children: <ListView match={match} events={match.pbp[item].events} />,
+      children: (
+        <ListView
+          match={match}
+          events={getSortedEvents(match.pbp[item].events)}
+        />
+      ),
     };
   });
   tabs.push({
     key: "all",
     label: "Tümü",
-    children: <ListView match={match} events={dataSourceEvents} />,
+    children: (
+      <ListView match={match} events={getSortedEvents(dataSourceEvents)} />
+    ),
   });
 
   return <Tabs defaultActiveKey="1" items={tabs} />;
