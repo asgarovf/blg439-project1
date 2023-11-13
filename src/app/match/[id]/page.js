@@ -126,7 +126,7 @@ export default function Match() {
         }}
         cancelText="Geri"
         okText="İleri"
-        width={"90%"}
+        width={"85%"}
         onCancel={() => {
           if (step === 1) {
             setStep(0);
@@ -137,8 +137,17 @@ export default function Match() {
         open={isModalVisible}
       >
         <Typography.Title level={3}>Veri Girişi</Typography.Title>
+
         {step === 1 ? (
           <div className="flex flex-col items-center space-y-4">
+            <Checkbox
+              checked={success}
+              onChange={(e) => {
+                setSuccess(e.target.checked);
+              }}
+            >
+              Başarılı
+            </Checkbox>
             <div className="flex space-x-4 justify-center align-center">
               {eventOptions.map((item, index) => (
                 <div
@@ -206,15 +215,6 @@ export default function Match() {
               </div>
             </div>
 
-            <Checkbox
-              checked={success}
-              onChange={(e) => {
-                setSuccess(e.target.checked);
-              }}
-            >
-              Başarılı
-            </Checkbox>
-
             <Typography.Text>Çeyrek</Typography.Text>
             <div className="flex space-x-4">
               {[1, 2, 3, 4].map((item, index) => (
@@ -250,7 +250,7 @@ export default function Match() {
             </div>
 
             <Typography.Text>Kalan Saniye</Typography.Text>
-            <div className="flex flex-wrap">
+            <div className="flex flex-wrap justify-center">
               {new Array(60).fill(0).map((item, index) => (
                 <div
                   onClick={() => {

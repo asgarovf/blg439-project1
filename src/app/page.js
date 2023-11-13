@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { addNewMatch, buildMatch } from "./store/matchSlicer";
 import { players } from "./data/players";
 import { teams } from "./data/teams";
+import { getTeamScoresFromPBP } from "./utils/getTeamScoresFromPBP";
 
 export default function Home() {
   const matchList = useSelector((state) => state.matchSlicer.matches);
@@ -196,8 +197,15 @@ export default function Home() {
           day: "numeric",
         });
 
+        const teamScoresFromPBP = getTeamScoresFromPBP(match.pbp);
+
         const competitor1 = fixture.competitors[0];
         const competitor2 = fixture.competitors[1];
+
+        const competitor1Score =
+          teamScoresFromPBP[competitor1.entityId] ?? competitor1?.score;
+        const competitor2Score =
+          teamScoresFromPBP[competitor2.entityId] ?? competitor2?.score;
 
         return (
           <div
@@ -219,9 +227,9 @@ export default function Home() {
                   />
                 </div>
                 <p className="ml-4 text-xl font-semibold">{competitor1.name}</p>
-                <p className="mx-2 font-bold text-2xl">{competitor1.score}</p>
+                <p className="mx-2 font-bold text-2xl">{competitor1Score}</p>
                 <p className="mx-2 font-bold text-2xl">-</p>
-                <p className="mx-2 font-bold text-2xl">{competitor2.score}</p>
+                <p className="mx-2 font-bold text-2xl">{competitor2Score}</p>
                 <p className="text-xl font-semibold ml-4">{competitor2.name}</p>
                 <div className="ml-4">
                   <img

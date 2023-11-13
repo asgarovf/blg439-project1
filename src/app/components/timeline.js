@@ -49,8 +49,6 @@ const ListView = ({ match, events }) => {
     competitorsById[item.entityId] = { ...item, index };
   });
 
-  const entityScores = getTeamScoresFromPBP(match.pbp);
-
   return (
     <List
       size="large"
@@ -65,7 +63,7 @@ const ListView = ({ match, events }) => {
           return person.personId === item.personId;
         });
 
-        const pbpEvents = getPBPEvents(match.pbp).slice(0, i);
+        const pbpEvents = getPBPEvents(match.pbp).slice(0, i + 1);
         const entityScores = getTeamScoresFromPBPEvents(pbpEvents);
 
         const homeEntity = match.fixture.competitors[0]?.entityId;
