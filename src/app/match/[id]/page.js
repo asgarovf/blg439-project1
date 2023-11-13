@@ -6,6 +6,7 @@ import { Timeline } from "@/app/components/timeline";
 import { eventOptions } from "@/app/const";
 import { players } from "@/app/data/players";
 import { addEvent } from "@/app/store/matchSlicer";
+import { getTeamScoresFromPBP } from "@/app/utils/getTeamScoresFromPBP";
 import { Button, Checkbox, Modal, Tabs, Typography } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
@@ -42,6 +43,8 @@ export default function Match() {
   const teamScoresArray = teamScoreKeys.map((key) => {
     return periodData.teamScores[key];
   });
+
+  const teamScoresFromPBP = getTeamScoresFromPBP(matchData.pbp);
 
   const getHomePlayerOptions = () => {
     return matchData.statistics.home.persons;
@@ -330,18 +333,22 @@ export default function Match() {
           </div>
 
           <div className="flex items-center space-x-10 mt-4">
-            <div className="text-4xl font-medium">{competitor1.score}</div>
+            <div className="text-4xl font-medium">
+              {teamScoresFromPBP[competitor1.entityId] ?? competitor1.score}
+            </div>
             <div className="text-4xl font-medium">-</div>
-            <div className="text-4xl font-medium">{competitor2.score}</div>
+            <div className="text-4xl font-medium">
+              {teamScoresFromPBP[competitor2.entityId] ?? competitor2.score}
+            </div>
           </div>
-          <div className="flex flex-col mt-2">
+          {/* <div className="flex flex-col mt-2">
             {teamScoresArray[0].map((item, index) => (
               <p className="row text-xs" key={index}>
                 {periodLabels[item.periodId]} - {item.score} -{" "}
                 {teamScoresArray[1][index].score}
               </p>
             ))}
-          </div>
+          </div> */}
         </div>
         <div className="flex items-center space-x-3">
           <img src={competitor2.logo} className="w-[64px]" alt="" />

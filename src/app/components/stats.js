@@ -1,6 +1,7 @@
 import { Table } from "antd";
 import { players } from "../data/players";
 import { useEffect, useMemo } from "react";
+import { getTeamScoresFromPBP } from "../utils/getTeamScoresFromPBP";
 
 export const headers = [
   {

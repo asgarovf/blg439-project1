@@ -1,5 +1,10 @@
 import { List, Tabs } from "antd";
 import { players } from "../data/players";
+import {
+  getPBPEvents,
+  getTeamScoresFromPBP,
+  getTeamScoresFromPBPEvents,
+} from "../utils/getTeamScoresFromPBP";
 
 export const Timeline = ({ match }) => {
   const dataSourceQuarters = Object.keys(match.pbp);
@@ -26,20 +31,13 @@ export const Timeline = ({ match }) => {
     return {
       key: item,
       label: `Q${item}`,
-      children: (
-        <ListView
-          match={match}
-          events={getSortedEvents(match.pbp[item].events)}
-        />
-      ),
+      children: <ListView match={match} events={match.pbp[item].events} />,
     };
   });
   tabs.push({
     key: "all",
     label: "Tümü",
-    children: (
-      <ListView match={match} events={getSortedEvents(dataSourceEvents)} />
-    ),
+    children: <ListView match={match} events={dataSourceEvents} />,
   });
 
   return <Tabs defaultActiveKey="1" items={tabs} />;
@@ -51,12 +49,14 @@ const ListView = ({ match, events }) => {
     competitorsById[item.entityId] = { ...item, index };
   });
 
+  const entityScores = getTeamScoresFromPBP(match.pbp);
+
   return (
     <List
       size="large"
       bordered
       dataSource={events}
-      renderItem={(item) => {
+      renderItem={(item, i) => {
         const competitor = competitorsById[item.entityId];
         const logo = competitor?.logo;
         const index = competitor?.index;
@@ -65,10 +65,13 @@ const ListView = ({ match, events }) => {
           return person.personId === item.personId;
         });
 
+        const pbpEvents = getPBPEvents(match.pbp).slice(0, i);
+        const entityScores = getTeamScoresFromPBPEvents(pbpEvents);
+
         const homeEntity = match.fixture.competitors[0]?.entityId;
         const awayEntity = match.fixture.competitors[1]?.entityId;
-        const homeScore = item?.scores[homeEntity];
-        const awayScore = item?.scores[awayEntity];
+        const homeScore = entityScores[homeEntity] ?? item?.scores[homeEntity];
+        const awayScore = entityScores[awayEntity] ?? item?.scores[awayEntity];
 
         return (
           <List.Item>

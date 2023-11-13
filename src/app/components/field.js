@@ -23,10 +23,6 @@ export const Field = ({ match }) => {
     return match.fixture.competitors.find((team) => team.entityId === entityId);
   };
 
-  const showModalFiltre = () => {
-    setIsModalOpenFiltre(true);
-  };
-
   const showModalShot = (shot, player, team) => {
     setSelectedShot(shot);
     setSelectedPlayer(player);
