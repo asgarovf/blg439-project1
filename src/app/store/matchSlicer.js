@@ -13,6 +13,9 @@ export const matchSlicer = createSlice({
     buildMatch: (state, action) => {
       state.value = action.payload;
     },
+    setMatches: (state, action) => {
+      state.matches = action.payload;
+    },
     addNewMatch: (state, action) => {
       state.matches = [action.payload, ...state.matches];
     },
@@ -62,12 +65,13 @@ export const matchSlicer = createSlice({
           console.error(err);
         }
       }
+      localStorage.setItem("matches", JSON.stringify(state.matches));
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { buildMatch, addNewMatch, addShot, addEvent } =
+export const { buildMatch, addNewMatch, addShot, addEvent, setMatches } =
   matchSlicer.actions;
 
 export default matchSlicer.reducer;
