@@ -132,7 +132,12 @@ export const Stats = ({ match }) => {
       turnovers: 0,
     };
 
-    const modifiedPlayers = [...players];
+    const modifiedPlayers = players.map((player) => {
+      return {
+        ...player,
+        statistics: { ...initialPlayerStatistics },
+      };
+    });
 
     let allEvents = pbpData[1].events;
     if (pbpData[2]?.events) {
@@ -160,9 +165,14 @@ export const Stats = ({ match }) => {
 
       const player = { ...modifiedPlayers[index] };
 
-      if (isEmpty(player.statistics) || player.statistics == undefined) {
-        player.statistics = { ...initialPlayerStatistics };
+
+
+      if (player.bib === "14") {
+        console.log("Event: ", event);
+        console.log("Player: ", player);
+        console.log("Player Statistics: ", player.statistics);
       }
+
 
       if (event.desc.includes("Asist")) {
         player.statistics = {
@@ -204,12 +214,20 @@ export const Stats = ({ match }) => {
           ? player.statistics.pointsTwoMade + 1
           : player.statistics.pointsTwoMade;
 
-        const newFieldGoalsAttempted =
-          player.statistics.fieldGoalsAttempted + 1;
+        const pointsTwoPercentage =
+          newPointsTwoAttempted !== 0
+            ? ((newPointsTwoMade / newPointsTwoAttempted) * 100).toFixed(2)
+            : 0;
 
+        const newFieldGoalsAttempted = player.statistics.fieldGoalsAttempted + 1;
         const newFieldGoalsMade = event.success
           ? player.statistics.fieldGoalsMade + 1
           : player.statistics.fieldGoalsMade;
+
+        const fieldGoalsPercentage =
+          newFieldGoalsAttempted !== 0
+            ? ((newFieldGoalsMade / newFieldGoalsAttempted) * 100).toFixed(2)
+            : 0;
 
         player.statistics = {
           ...player.statistics,
@@ -217,28 +235,33 @@ export const Stats = ({ match }) => {
           fieldGoalsAttempted: newFieldGoalsAttempted,
           pointsTwoMade: newPointsTwoMade,
           fieldGoalsMade: newFieldGoalsMade,
-          points: event.success
-            ? player.statistics.points + 2
-            : player.statistics.points,
-          pointsTwoPercentage: (newPointsTwoMade / newPointsTwoAttempted) * 100,
-          fieldGoalsPercentage:
-            (newFieldGoalsMade / newFieldGoalsAttempted) * 100,
+          points: event.success ? player.statistics.points + 2 : player.statistics.points,
+          pointsTwoPercentage: pointsTwoPercentage,
+          fieldGoalsPercentage: fieldGoalsPercentage,
         };
       } else if (
         event.desc.includes("Üç Sayı") ||
         event.desc.includes("3 Sayı")
       ) {
-        const newPointsThreeAttempted =
-          player.statistics.pointsThreeAttempted + 1;
+        const newPointsThreeAttempted = player.statistics.pointsThreeAttempted + 1;
         const newPointsThreeMade = event.success
           ? player.statistics.pointsThreeMade + 1
           : player.statistics.pointsThreeMade;
 
-        const newFieldGoalsAttempted =
-          player.statistics.fieldGoalsAttempted + 1;
+        const newFieldGoalsAttempted = player.statistics.fieldGoalsAttempted + 1;
         const newFieldGoalsMade = event.success
           ? player.statistics.fieldGoalsMade + 1
           : player.statistics.fieldGoalsMade;
+
+        const fieldGoalsPercentage =
+          newFieldGoalsAttempted !== 0
+            ? ((newFieldGoalsMade / newFieldGoalsAttempted) * 100).toFixed(2)
+            : 0;
+
+        const pointsThreePercentage =
+          newPointsThreeAttempted !== 0
+            ? ((newPointsThreeMade / newPointsThreeAttempted) * 100).toFixed(2)
+            : 0;
 
         player.statistics = {
           ...player.statistics,
@@ -246,14 +269,11 @@ export const Stats = ({ match }) => {
           fieldGoalsAttempted: newFieldGoalsAttempted,
           pointsThreeMade: newPointsThreeMade,
           fieldGoalsMade: newFieldGoalsMade,
-          points: event.success
-            ? player.statistics.points + 3
-            : player.statistics.points,
-          pointsThreePercentage:
-            (newPointsThreeMade / newPointsThreeAttempted) * 100,
-          fieldGoalsPercentage:
-            (newFieldGoalsMade / newFieldGoalsAttempted) * 100,
+          points: event.success ? player.statistics.points + 3 : player.statistics.points,
+          pointsThreePercentage: pointsThreePercentage,
+          fieldGoalsPercentage: fieldGoalsPercentage,
         };
+
       } else if (event.desc.includes("Serbest Atış")) {
         const newFreeThrowsMade = event.success
           ? player.statistics.freeThrowsMade + 1
@@ -266,17 +286,25 @@ export const Stats = ({ match }) => {
           ? player.statistics.fieldGoalsMade + 1
           : player.statistics.fieldGoalsMade;
 
+        const freeThrowsPercentage =
+          newFreeThrowsAttempted !== 0
+            ? ((newFreeThrowsMade / newFreeThrowsAttempted) * 100).toFixed(2)
+            : 0;
+
+        const fieldGoalsPercentage =
+          newFieldGoalsAttempted !== 0
+            ? ((newFieldGoalsMade / newFieldGoalsAttempted) * 100).toFixed(2)
+            : 0;
+
         player.statistics = {
           ...player.statistics,
           freeThrowsAttempted: newFreeThrowsAttempted,
           freeThrowsMade: newFreeThrowsMade,
           points: event.success
             ? player.statistics.points + 1
-            : player.statistics.point,
-          freeThrowsPercentage:
-            (newFreeThrowsMade / newFreeThrowsAttempted) * 100,
-          fieldGoalsPercentage:
-            (newFieldGoalsMade / newFieldGoalsAttempted) * 100,
+            : player.statistics.points,
+          freeThrowsPercentage: freeThrowsPercentage,
+          fieldGoalsPercentage: fieldGoalsPercentage,
         };
       } else if (event.desc.includes("Ribaund")) {
         player.statistics = {
@@ -294,6 +322,10 @@ export const Stats = ({ match }) => {
             reboundsOffensive: player.statistics.reboundsOffensive + 1,
           };
         }
+      }
+
+      if (player.bib === 14) {
+        console.log("Updated Player Statistics: ", player.statistics);
       }
 
       modifiedPlayers[index] = {
