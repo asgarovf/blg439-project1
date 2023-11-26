@@ -4,6 +4,7 @@ import { matches } from "../data";
 const initialState = {
   value: {},
   matches: matches,
+  clocks: {},
 };
 
 export const matchSlicer = createSlice({
@@ -18,6 +19,10 @@ export const matchSlicer = createSlice({
     },
     addNewMatch: (state, action) => {
       state.matches = [action.payload, ...state.matches];
+      state.clocks[action.payload.seasonId] = {
+        running: false,
+        time: 2400,
+      };
     },
     addShot: (state, action) => {
       const { matchId, shot } = action.payload;
@@ -67,11 +72,26 @@ export const matchSlicer = createSlice({
       }
       localStorage.setItem("matches", JSON.stringify(state.matches));
     },
+    setClocks: (state, action) => {
+      state.clocks = action.payload;
+      localStorage.setItem("clocks", JSON.stringify(state.clocks));
+    },
+    toggleClock: (state, action) => {
+      state.clocks[action.payload].running =
+        !state.clocks[action.payload].running;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { buildMatch, addNewMatch, addShot, addEvent, setMatches } =
-  matchSlicer.actions;
+export const {
+  buildMatch,
+  addNewMatch,
+  addShot,
+  addEvent,
+  setMatches,
+  setClocks,
+  toggleClock,
+} = matchSlicer.actions;
 
 export default matchSlicer.reducer;
