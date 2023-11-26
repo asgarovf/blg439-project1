@@ -13,10 +13,34 @@ export default function Home() {
   const matchList = useSelector((state) => state.matchSlicer.matches);
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [newTeamData, setNewTeamData] = useState({
+    entityId: uuidv4(),
+    name: null,
+    logo: "https://www.espn.com/i/teamlogos/soccer/500/default-team-logo-500.png?h=100&w=100",
+  });
+
+  const [newPlayerData, setNewPlayerData] = useState({
+    isCustom: true,
+    active: false,
+    bib: null,
+    entityId: null,
+    personId: uuidv4(),
+    personImage:
+      "https://static.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-vector.jpg",
+    personName: null,
+    starter: null,
+    statistics: {},
+  });
+
   const [team1, setTeam1] = useState(null);
   const [team2, setTeam2] = useState(null);
   const [venue, setVenue] = useState("");
   const dispatch = useDispatch();
+
+  localStorage.setItem("players", JSON.stringify(players));
+  localStorage.setItem("teams", JSON.stringify(teams));
 
   const buildInitialMatchData = () => {
     const home = teams.find((item) => {
@@ -135,6 +159,25 @@ export default function Home() {
     return { label: team.name, value: team.entityId };
   });
 
+  const buildNewPlayer = () => {
+    const localPlayers = JSON.parse(localStorage.getItem("players"));
+    const updatedPlayers = [...localPlayers, newPlayerData];
+    localStorage.setItem("players", JSON.stringify(updatedPlayers));
+
+    setIsPlayerModalOpen(false);
+  };
+
+  const buildNewTeam = () => {
+    const localTeams = JSON.parse(localStorage.getItem("teams"));
+    console.log('Local Teams', localTeams);
+    console.log('New Team Data', newTeamData);
+    const updatedTeams = [...localTeams, newTeamData];
+    console.log('Updated Teams', updatedTeams);
+    localStorage.setItem("teams", JSON.stringify(updatedTeams));
+
+    setIsTeamModalOpen(false);
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24 pt-10">
       <Modal
@@ -185,6 +228,52 @@ export default function Home() {
       <Button className="mb-2" onClick={() => setIsModalOpen(true)}>
         Yeni Maç
       </Button>
+
+      <Button className="mb-2" onClick={() => setIsTeamModalOpen(true)}>
+        Yeni Takım Ekle
+      </Button>
+
+      <Button className="mb-2" onClick={() => setIsPlayerModalOpen(true)}>
+        Yeni Oyuncu Ekle
+      </Button>
+
+      <Modal
+        visible={isPlayerModalOpen}
+        onOk={buildNewPlayer}
+        onCancel={() => setIsPlayerModalOpen(false)}
+      >
+        <Typography.Title level={2}>Yeni Oyuncu Ekle</Typography.Title>
+        <Input
+          size="large"
+          className="mt-2"
+          placeholder="İsim Soyisim"
+          value={newPlayerData.personName}
+          onChange={(e) => setNewPlayerData({ ...newPlayerData, personName: e.target.value })}
+        />
+        <Input
+          size="large"
+          className="mt-2"
+          placeholder="Oyuncu Numarası"
+          value={newPlayerData.bib}
+          onChange={(e) => setNewPlayerData({ ...newPlayerData, bib: e.target.value })}
+        />
+      </Modal>
+
+      <Modal
+        visible={isTeamModalOpen}
+        onOk={buildNewTeam}
+        onCancel={() => setIsTeamModalOpen(false)}
+      >
+        <Typography.Title level={2}>Yeni Takım Ekle</Typography.Title>
+        <Input
+          size="large"
+          className="mt-2"
+          placeholder="İsim"
+          value={newTeamData.name}
+          onChange={(e) => setNewTeamData({ ...newTeamData, name: e.target.value })}
+        />
+      </Modal>
+
       <h1 className="text-4xl font-bold mb-8">Maçlar</h1>
       {matchList.map((match, index) => {
         const fixture = match.fixture;
