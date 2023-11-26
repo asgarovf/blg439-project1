@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { Button, Input, Modal, Select, Typography } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import { addNewMatch, buildMatch } from "./store/matchSlicer";
@@ -39,8 +39,10 @@ export default function Home() {
   const [venue, setVenue] = useState("");
   const dispatch = useDispatch();
 
-  localStorage.setItem("players", JSON.stringify(players));
-  localStorage.setItem("teams", JSON.stringify(teams));
+  useEffect(() => {
+    localStorage.setItem("players", JSON.stringify(players));
+    localStorage.setItem("teams", JSON.stringify(teams));
+  }, []);
 
   const buildInitialMatchData = () => {
     const home = teams.find((item) => {
@@ -180,6 +182,8 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24 pt-10">
+
+
       <Modal
         okButtonProps={{
           disabled: team1 == null || team2 == null || team1 == team2,
@@ -273,6 +277,10 @@ export default function Home() {
           onChange={(e) => setNewTeamData({ ...newTeamData, name: e.target.value })}
         />
       </Modal>
+
+      <Button className="mb-2" onClick={router.push('/admin')}>
+        Admin Page
+      </Button>
 
       <h1 className="text-4xl font-bold mb-8">Maçlar</h1>
       {matchList.map((match, index) => {
