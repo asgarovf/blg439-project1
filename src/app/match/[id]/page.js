@@ -5,7 +5,8 @@ import { Stats } from "@/app/components/stats";
 import { Timeline } from "@/app/components/timeline";
 import { eventOptions } from "@/app/const";
 import { players } from "@/app/data/players";
-import { addEvent } from "@/app/store/matchSlicer";
+import { addEvent, toggleClock } from "@/app/store/matchSlicer";
+import { calculateEventTime } from "@/app/utils/calculateEventTime";
 import { getTeamScoresFromPBP } from "@/app/utils/getTeamScoresFromPBP";
 import { Button, Checkbox, Modal, Tabs, Typography } from "antd";
 import { useParams, useRouter } from "next/navigation";
@@ -16,13 +17,11 @@ import useResizeObserver from "use-resize-observer";
 export default function Match() {
   const { id } = useParams();
   const matches = useSelector((state) => state.matchSlicer.matches);
+  const clocks = useSelector((state) => state.matchSlicer.clocks);
   const router = useRouter();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [step, setStep] = useState(0);
   const [event, setEvent] = useState("");
-  const [quarter, setQuarter] = useState(1);
-  const [minute, setMinutes] = useState(11);
-  const [seconds, setSeconds] = useState(59);
   const [player, setPlayer] = useState(null);
   const [success, setSuccess] = useState(false);
   const [coordinates, setCoordinates] = useState({
@@ -31,6 +30,8 @@ export default function Match() {
   });
   const { ref, width = 1200, height = 750 } = useResizeObserver();
   const wrapperRef = useRef();
+  const [periodSnapshot, setPeriodSnapshot] = useState(null);
+  const [snapshot, setSnapshot] = useState(null);
   const dispatch = useDispatch();
 
   const matchData = matches[id];
@@ -79,6 +80,10 @@ export default function Match() {
     return players.find((item) => item.personId === player);
   }, [player]);
 
+  const clockDataForMatch = clocks?.[matchData?.seasonId];
+  const clockExists = clockDataForMatch != null;
+  const time = calculateEventTime(clockDataForMatch?.time);
+
   return (
     <div className="pt-10 flex flex-col items-center max-w-[1280px] mx-auto">
       <Modal
@@ -94,12 +99,12 @@ export default function Match() {
             const eventOption = eventOptions.find((item) => item.key === event);
             const newShot = {
               bib: "9",
-              clock: `PT${minute}M${seconds}S`,
+              clock: snapshot,
               desc: eventOption.code,
               entityId: rawPlayer?.entityId,
               eventType: eventOption.key,
               name: "",
-              periodId: quarter,
+              periodId: periodSnapshot,
               personId: player,
               success: success,
               successString: "",
@@ -116,6 +121,8 @@ export default function Match() {
                 event: newShot,
               })
             );
+            setPeriodSnapshot(time.p);
+            setSnapshot(`PT${time.m}M ${time.s}S`);
             setCoordinates({
               x: 0,
               y: 0,
@@ -140,32 +147,79 @@ export default function Match() {
 
         {step === 1 ? (
           <div className="flex flex-col items-center space-y-4">
-            <Checkbox
+            {/* <Checkbox
               checked={success}
               onChange={(e) => {
                 setSuccess(e.target.checked);
               }}
             >
               Başarılı
-            </Checkbox>
+            </Checkbox> */}
             <div className="flex space-x-4 justify-center align-center">
-              {eventOptions.map((item, index) => (
-                <div
-                  onClick={() => {
-                    setEvent(item.key);
-                  }}
-                  className={`min-h-[32px] text-center cursor-pointer min-w-[64px] p-2 border-2 rounded-lg border-neutral-800  flex justify-center ${
-                    event === item.key ? "bg-blue-300" : "bg-neutral-0"
-                  } `}
-                  key={index}
-                >
-                  {item.code}
-                </div>
-              ))}
+              {eventOptions.map((item, index) => {
+                if (
+                  item.key === "freeThrowsMade" ||
+                  item.key === "pointsTwoMade" ||
+                  item.key === "pointsThreeMade"
+                ) {
+                  return (
+                    <div
+                      onClick={() => {
+                        setEvent(item.key);
+                      }}
+                      className={`min-h-[32px] text-center cursor-pointer overflow-hidden min-w-[64px] border-2 rounded-lg border-neutral-800  flex justify-center ${
+                        event === item.key ? "bg-blue-300" : "bg-neutral-0"
+                      } `}
+                      key={index}
+                    >
+                      <div
+                        onClick={() => {
+                          setSuccess(true);
+                          setEvent(item.key);
+                        }}
+                        className={
+                          event === item.key && success
+                            ? "bg-green-500 p-2 min-w-[56px]"
+                            : "bg-green-200 p-2 min-w-[56px]"
+                        }
+                      >
+                        {item.code.split(" ")[0]}
+                      </div>
+                      <div
+                        onClick={() => {
+                          setSuccess(false);
+                          setEvent(item.key);
+                        }}
+                        className={
+                          event === item.key && !success
+                            ? "bg-red-500 p-2 min-w-[56px]"
+                            : "bg-red-200 p-2 min-w-[56px]"
+                        }
+                      >
+                        {item.code.split(" ")[1]}
+                      </div>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div
+                      onClick={() => {
+                        setEvent(item.key);
+                      }}
+                      className={`min-h-[32px] text-center cursor-pointer min-w-[64px] p-2 border-2 rounded-lg border-neutral-800  flex justify-center ${
+                        event === item.key ? "bg-blue-300" : "bg-neutral-0"
+                      } `}
+                      key={index}
+                    >
+                      {item.code}
+                    </div>
+                  );
+                }
+              })}
             </div>
 
-            <div className="flex">
-              <div className="flex flex-col space-x-4 shrink-0 w-1/2">
+            <div className="flex space-x-6">
+              <div className="flex flex-col space-x-4 shrink-0 w-1/2 bg-neural-0 border-2 rounded-lg p-4">
                 <p className="text-lg font-bold mb-3">{competitor1?.name}</p>
                 <div className="flex flex-wrap items-center justify-center">
                   {getHomePlayerOptions()
@@ -176,19 +230,19 @@ export default function Match() {
                           setPlayer(p.personId);
                         }}
                         key={index}
-                        className={`mr-4 mb-4 flex shrink-0 flex-col border-neutral-400 border-2 p-2 rounded-lg justify-center items-center ${
+                        className={`w-[200px] h-[200px] mr-4 mb-4 flex shrink-0 flex-col border-neutral-400 border-2 p-2 rounded-lg justify-center items-center ${
                           p.personId === player ? "bg-blue-300" : ""
                         }`}
                       >
-                        <img alt="" src={p.personImage} className="w-[60px]" />
-                        <p className="font-bold">
+                        <img alt="" src={p.personImage} className="w-[100px]" />
+                        <p className="font-bold text-center mt-2">
                           {p.bib} - {p.personName}
                         </p>
                       </div>
                     ))}
                 </div>
               </div>
-              <div className="flex flex-col space-x-4 shrink-0 w-1/2">
+              <div className="flex flex-col space-x-4 shrink-0 w-1/2  bg-neural-0 border-2 rounded-lg p-4">
                 <p className="text-lg flex mb-3 font-bold">
                   {competitor2?.name}
                 </p>
@@ -201,69 +255,18 @@ export default function Match() {
                           setPlayer(p.personId);
                         }}
                         key={index}
-                        className={`mr-4 mb-4 flex shrink-0 flex-col border-neutral-400 border-2 p-2 rounded-lg justify-center items-center ${
+                        className={`w-[200px] h-[200px] mr-4 mb-4 flex shrink-0 flex-col border-neutral-400 border-2 p-2 rounded-lg justify-center items-center ${
                           p.personId === player ? "bg-blue-300" : ""
                         }`}
                       >
-                        <img alt="" src={p.personImage} className="w-[60px]" />
-                        <p>
+                        <img alt="" src={p.personImage} className="w-[100px]" />
+                        <p className="font-bold text-center mt-2">
                           {p.bib} - {p.personName}
                         </p>
                       </div>
                     ))}
                 </div>
               </div>
-            </div>
-
-            <Typography.Text>Çeyrek</Typography.Text>
-            <div className="flex space-x-4">
-              {[1, 2, 3, 4].map((item, index) => (
-                <div
-                  onClick={() => {
-                    setQuarter(item);
-                  }}
-                  className={`min-h-[32px] text-center cursor-pointer min-w-[64px] p-2 border-2 rounded-lg border-neutral-800  flex justify-center ${
-                    quarter === item ? "bg-blue-300" : "bg-neutral-0"
-                  } `}
-                  key={index}
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
-
-            <Typography.Text>Kalan Dakika</Typography.Text>
-            <div className="flex space-x-4">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((item, index) => (
-                <div
-                  onClick={() => {
-                    setMinutes(item);
-                  }}
-                  className={`min-h-[32px] text-center cursor-pointer min-w-[64px] p-2 border-2 rounded-lg border-neutral-800  flex justify-center ${
-                    minute === item ? "bg-blue-300" : "bg-neutral-0"
-                  } `}
-                  key={index}
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
-
-            <Typography.Text>Kalan Saniye</Typography.Text>
-            <div className="flex flex-wrap justify-center">
-              {new Array(60).fill(0).map((item, index) => (
-                <div
-                  onClick={() => {
-                    setSeconds(index);
-                  }}
-                  className={`min-h-[32px] mr-2 mb-2 text-center cursor-pointer min-w-[64px] p-2 border-2 rounded-lg border-neutral-800  flex justify-center ${
-                    seconds === index ? "bg-blue-300" : "bg-neutral-0"
-                  } `}
-                  key={index}
-                >
-                  {index}
-                </div>
-              ))}
             </div>
           </div>
         ) : (
@@ -278,6 +281,7 @@ export default function Match() {
                   x: (x * 100) / width,
                   y: ((height - y) * 100) / height,
                 });
+                setStep(1);
               }}
               className="w-full h-full relative mb-10"
             >
@@ -321,13 +325,24 @@ export default function Match() {
             >
               Maçlar
             </Button>
-            {matchData.isCustom && (
+            {matchData.isCustom && clockExists && (
               <Button
                 onClick={() => {
+                  setPeriodSnapshot(time.p);
+                  setSnapshot(`PT${time.m}M ${time.s}S`);
                   setIsModalVisible(true);
                 }}
               >
                 Veri Girişi
+              </Button>
+            )}
+            {matchData.isCustom && clockExists && (
+              <Button
+                onClick={() => {
+                  dispatch(toggleClock(matchData.seasonId));
+                }}
+              >
+                Saati {clockDataForMatch.running ? "Durdur" : "Başlat"}
               </Button>
             )}
           </div>
@@ -341,6 +356,15 @@ export default function Match() {
               {teamScoresFromPBP[competitor2.entityId] ?? competitor2.score}
             </div>
           </div>
+
+          {clockExists ? (
+            <div className="text-md font-medium">
+              {time.p}.periyot {time.m}:{time.s}
+            </div>
+          ) : (
+            <div className="text-md font-medium">Bitti</div>
+          )}
+
           {/* <div className="flex flex-col mt-2">
             {teamScoresArray[0].map((item, index) => (
               <p className="row text-xs" key={index}>
