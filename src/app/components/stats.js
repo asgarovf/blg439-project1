@@ -313,6 +313,10 @@ export const Stats = ({ match }) => {
         }
       }
 
+      if (player.bib === 14) {
+        console.log("Updated Player Statistics: ", player.statistics);
+      }
+
       modifiedPlayers[index] = {
         ...modifiedPlayers[index],
         statistics: player.statistics,
