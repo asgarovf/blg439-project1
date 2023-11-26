@@ -102,8 +102,6 @@ export const Stats = ({ match }) => {
     };
   });
 
-  ////////////////////////////////////////////////////////////////////////////
-
   function generateStatisticsFromPBP(pbpData, players) {
     const initialPlayerStatistics = {
       assists: 0,
@@ -164,15 +162,6 @@ export const Stats = ({ match }) => {
       }
 
       const player = { ...modifiedPlayers[index] };
-
-
-
-      if (player.bib === "14") {
-        console.log("Event: ", event);
-        console.log("Player: ", player);
-        console.log("Player Statistics: ", player.statistics);
-      }
-
 
       if (event.desc.includes("Asist")) {
         player.statistics = {
@@ -322,10 +311,6 @@ export const Stats = ({ match }) => {
             reboundsOffensive: player.statistics.reboundsOffensive + 1,
           };
         }
-      }
-
-      if (player.bib === 14) {
-        console.log("Updated Player Statistics: ", player.statistics);
       }
 
       modifiedPlayers[index] = {
