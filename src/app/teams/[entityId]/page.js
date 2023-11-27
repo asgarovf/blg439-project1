@@ -3,7 +3,7 @@ import { React, useState, useEffect, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useParams } from "next/navigation";
 import { getPopulatedTeams } from "../../data/teams";
-import { getPopulatedPlayers, initialPlayers } from "../../data/players";
+import { getPopulatedPlayers } from "../../data/players";
 import { Form, Button, Modal, Input, Popconfirm, message, Table } from "antd";
 
 const TeamInfoPage = () => {
