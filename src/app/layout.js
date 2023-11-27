@@ -5,6 +5,7 @@ import { Provider, useDispatch, useSelector } from "react-redux";
 import { store } from "./store";
 import { useEffect } from "react";
 import { setClocks, setMatches } from "./store/matchSlicer";
+import { Sidebar } from "./components/sidebar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +19,10 @@ export default function RootLayout({ children }) {
         <body className={inter.className}>
           <MatchSetter />
           <ClockIntervalHandler />
-          {children}
+          <div className="flex flex-col">
+            <Sidebar />
+            {children}
+          </div>
         </body>
       </html>
     </Provider>

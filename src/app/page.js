@@ -15,24 +15,24 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
-  const [newTeamData, setNewTeamData] = useState({
-    entityId: uuidv4(),
-    name: null,
-    logo: "https://www.espn.com/i/teamlogos/soccer/500/default-team-logo-500.png?h=100&w=100",
-  });
+  // const [newTeamData, setNewTeamData] = useState({
+  //   entityId: uuidv4(),
+  //   name: null,
+  //   logo: "https://www.espn.com/i/teamlogos/soccer/500/default-team-logo-500.png?h=100&w=100",
+  // });
 
-  const [newPlayerData, setNewPlayerData] = useState({
-    isCustom: true,
-    active: false,
-    bib: null,
-    entityId: null,
-    personId: uuidv4(),
-    personImage:
-      "https://static.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-vector.jpg",
-    personName: null,
-    starter: null,
-    statistics: {},
-  });
+  // const [newPlayerData, setNewPlayerData] = useState({
+  //   isCustom: true,
+  //   active: false,
+  //   bib: null,
+  //   entityId: null,
+  //   personId: uuidv4(),
+  //   personImage:
+  //     "https://static.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-vector.jpg",
+  //   personName: null,
+  //   starter: null,
+  //   statistics: {},
+  // });
 
   const [team1, setTeam1] = useState(null);
   const [team2, setTeam2] = useState(null);
@@ -171,19 +171,16 @@ export default function Home() {
 
   const buildNewTeam = () => {
     const localTeams = JSON.parse(localStorage.getItem("teams"));
-    console.log('Local Teams', localTeams);
-    console.log('New Team Data', newTeamData);
+    console.log("Local Teams", localTeams);
+    console.log("New Team Data", newTeamData);
     const updatedTeams = [...localTeams, newTeamData];
-    console.log('Updated Teams', updatedTeams);
+    console.log("Updated Teams", updatedTeams);
     localStorage.setItem("teams", JSON.stringify(updatedTeams));
-
     setIsTeamModalOpen(false);
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24 pt-10">
-
-
+    <main className="flex w-full h-screen overflow-auto flex-col items-center justify-between p-24 pt-10">
       <Modal
         okButtonProps={{
           disabled: team1 == null || team2 == null || team1 == team2,
@@ -229,60 +226,18 @@ export default function Home() {
           onChange={(e) => setVenue(e.target.value)}
         />
       </Modal>
-      <Button className="mb-2" onClick={() => setIsModalOpen(true)}>
-        Yeni Maç
-      </Button>
 
-      <Button className="mb-2" onClick={() => setIsTeamModalOpen(true)}>
-        Yeni Takım Ekle
-      </Button>
+      <div className="flex justify-between w-full max-w-[90%]">
+        <h1 className="text-4xl font-bold mb-8">Maçlar</h1>
+        <Button
+          type="primary"
+          className="mb-2"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Yeni Maç
+        </Button>
+      </div>
 
-      <Button className="mb-2" onClick={() => setIsPlayerModalOpen(true)}>
-        Yeni Oyuncu Ekle
-      </Button>
-
-      <Modal
-        visible={isPlayerModalOpen}
-        onOk={buildNewPlayer}
-        onCancel={() => setIsPlayerModalOpen(false)}
-      >
-        <Typography.Title level={2}>Yeni Oyuncu Ekle</Typography.Title>
-        <Input
-          size="large"
-          className="mt-2"
-          placeholder="İsim Soyisim"
-          value={newPlayerData.personName}
-          onChange={(e) => setNewPlayerData({ ...newPlayerData, personName: e.target.value })}
-        />
-        <Input
-          size="large"
-          className="mt-2"
-          placeholder="Oyuncu Numarası"
-          value={newPlayerData.bib}
-          onChange={(e) => setNewPlayerData({ ...newPlayerData, bib: e.target.value })}
-        />
-      </Modal>
-
-      <Modal
-        visible={isTeamModalOpen}
-        onOk={buildNewTeam}
-        onCancel={() => setIsTeamModalOpen(false)}
-      >
-        <Typography.Title level={2}>Yeni Takım Ekle</Typography.Title>
-        <Input
-          size="large"
-          className="mt-2"
-          placeholder="İsim"
-          value={newTeamData.name}
-          onChange={(e) => setNewTeamData({ ...newTeamData, name: e.target.value })}
-        />
-      </Modal>
-
-      <Button className="mb-2" onClick={router.push('/admin')}>
-        Admin Page
-      </Button>
-
-      <h1 className="text-4xl font-bold mb-8">Maçlar</h1>
       {matchList.map((match, index) => {
         const fixture = match.fixture;
         const date = new Date(fixture.startTimeLocal);
@@ -307,38 +262,47 @@ export default function Home() {
           <div
             onClick={() => router.push(`/match/${index}`)}
             key={index}
-            className="bg-white hover:cursor-pointer hover:bg-gray-50 border-2 border-gray-300 p-4 mb-4 rounded-lg shadow-md"
-            style={{ width: "1200px" }}
+            className="bg-white hover:cursor-pointer hover:bg-gray-50 border-2 border-gray-300 p-4 mb-4 rounded-lg shadow-md w-full max-w-[90%]"
           >
             <p className="text-center text-lg font-semibold mt-2">
               {fixture.venue}
             </p>
             <div className="flex items-center justify-center my-2">
-              <div className="flex items-center justify-center my-2">
-                <div className="mr-4">
-                  <img
-                    src={competitor1.logo}
-                    alt="Team Logo"
-                    className="w-24 h-24 rounded-full"
-                  />
+              <div className="grid grid-cols-3 items-center justify-center my-2">
+                <div className="flex justify-center items-center col-span-1 pl-10">
+                  <div className="mr-4">
+                    <img
+                      src={competitor1.logo}
+                      alt="Team Logo"
+                      className="w-16 h-16 rounded-full"
+                    />
+                  </div>
+                  <p className="ml-4 text-md font-semibold text-center">
+                    {competitor1.name}
+                  </p>
                 </div>
-                <p className="ml-4 text-xl font-semibold">{competitor1.name}</p>
-                <p className="mx-2 font-bold text-2xl">{competitor1Score}</p>
-                <p className="mx-2 font-bold text-2xl">-</p>
-                <p className="mx-2 font-bold text-2xl">{competitor2Score}</p>
-                <p className="text-xl font-semibold ml-4">{competitor2.name}</p>
-                <div className="ml-4">
-                  <img
-                    src={competitor2.logo}
-                    alt="Team Logo"
-                    className="w-24 h-24 rounded-full"
-                  />
+
+                <div className="flex justify-center items-center col-span-1">
+                  <p className="mx-2 font-bold text-2xl">{competitor1Score}</p>
+                  <p className="mx-2 font-bold text-2xl">-</p>
+                  <p className="mx-2 font-bold text-2xl">{competitor2Score}</p>
+                </div>
+
+                <div className="flex justify-center items-center col-span-1 pr-10">
+                  <p className="text-md font-semibold ml-4 text-center">
+                    {competitor2.name}
+                  </p>
+                  <div className="ml-4">
+                    <img
+                      src={competitor2.logo}
+                      alt="Team Logo"
+                      className="w-16 h-16 rounded-full shrink-0"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-            <p className="text-center text-lg font-semibold mt-4">
-              {formattedDate}
-            </p>
+            <p className="text-center text-lg font-semibold">{formattedDate}</p>
           </div>
         );
       })}

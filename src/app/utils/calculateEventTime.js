@@ -1,5 +1,6 @@
-const pad = (n: number) => (n < 10 ? `0${n}` : n);
-export const calculateEventTime = (time?: number) => {
+const pad = (n) => (n < 10 ? `0${n}` : n);
+
+export const calculateEventTime = (time) => {
   if (time == null) {
     return {
       p: 0,

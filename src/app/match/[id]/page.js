@@ -1,5 +1,4 @@
 "use client";
-
 import { Field } from "@/app/components/field";
 import { Stats } from "@/app/components/stats";
 import { Timeline } from "@/app/components/timeline";
@@ -8,7 +7,7 @@ import { players } from "@/app/data/players";
 import { addEvent, toggleClock } from "@/app/store/matchSlicer";
 import { calculateEventTime } from "@/app/utils/calculateEventTime";
 import { getTeamScoresFromPBP } from "@/app/utils/getTeamScoresFromPBP";
-import { Button, Checkbox, Modal, Tabs, Typography } from "antd";
+import { Button, Modal, Tabs, Typography } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -85,7 +84,7 @@ export default function Match() {
   const time = calculateEventTime(clockDataForMatch?.time);
 
   return (
-    <div className="pt-10 flex flex-col items-center max-w-[1280px] mx-auto">
+    <div className="pt-10 flex flex-col items-center w-[90%] mb-10 mx-auto">
       <Modal
         okButtonProps={{
           disabled:
@@ -311,12 +310,12 @@ export default function Match() {
           </>
         )}
       </Modal>
-      <div className="flex justify-between w-full">
-        <div className="flex items-center space-x-3">
+      <div className="grid grid-cols-3 justify-between w-full">
+        <div className="flex col-span-1 justify-center items-center space-x-3">
           <div className="text-3xl font-medium">{competitor1.name}</div>
           <img src={competitor1.logo} className="w-[64px]" alt="" />
         </div>
-        <div className="flex flex-col justify-center items-center">
+        <div className="flex col-span-1 justify-center flex-col items-center">
           <div className="flex space-x-3">
             <Button
               onClick={() => {
@@ -374,14 +373,14 @@ export default function Match() {
             ))}
           </div> */}
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex col-span-1 justify-center items-center space-x-3">
           <img src={competitor2.logo} className="w-[64px]" alt="" />
           <div className="text-3xl font-medium max-w-[350px] overflow-hidden">
             {competitor2.name}
           </div>
         </div>
       </div>
-      <div className="w-full">
+      <div className="w-[90%]">
         <Tabs defaultActiveKey="1" items={items} />
       </div>
     </div>
