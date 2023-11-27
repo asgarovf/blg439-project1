@@ -94,7 +94,6 @@ const TeamInfoPage = () => {
       key: "personImage",
       align: "center",
       render: (_, p) => {
-        console.log(p);
         return (
           <div className="flex justify-center">
             <img

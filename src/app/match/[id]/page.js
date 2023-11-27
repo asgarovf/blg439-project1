@@ -47,7 +47,6 @@ export default function Match() {
   };
 
   const getAwayPlayerOptions = () => {
-    console.log(matchData.statistics);
     return matchData.statistics.away.persons;
   };
 
@@ -226,11 +225,11 @@ export default function Match() {
                           setPlayer(p.personId);
                         }}
                         key={index}
-                        className={`w-[200px] h-[200px] mr-4 mb-4 flex shrink-0 flex-col border-neutral-400 border-2 p-2 rounded-lg justify-center items-center ${
+                        className={`w-[200px] h-[140px]  mr-4 mb-4 flex shrink-0 flex-col border-neutral-400 border-2 p-2 rounded-lg justify-center items-center ${
                           p.personId === player ? "bg-blue-300" : ""
                         }`}
                       >
-                        <img alt="" src={p.personImage} className="w-[100px]" />
+                        <img alt="" src={p.personImage} className="w-[64px]" />
                         <p className="font-bold text-center mt-2">
                           {p.bib} - {p.personName}
                         </p>
@@ -251,11 +250,11 @@ export default function Match() {
                           setPlayer(p.personId);
                         }}
                         key={index}
-                        className={`w-[200px] h-[200px] mr-4 mb-4 flex shrink-0 flex-col border-neutral-400 border-2 p-2 rounded-lg justify-center items-center ${
+                        className={`w-[200px] h-[140px] mr-4 mb-4 flex shrink-0 flex-col border-neutral-400 border-2 p-2 rounded-lg justify-center items-center ${
                           p.personId === player ? "bg-blue-300" : ""
                         }`}
                       >
-                        <img alt="" src={p.personImage} className="w-[100px]" />
+                        <img alt="" src={p.personImage} className="w-[64px]" />
                         <p className="font-bold text-center mt-2">
                           {p.bib} - {p.personName}
                         </p>

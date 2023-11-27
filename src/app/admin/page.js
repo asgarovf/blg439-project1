@@ -76,6 +76,7 @@ const AdminPage = () => {
       render: (text, a, b) => {
         return (
           <a
+            className="text-blue-500"
             onClick={() => {
               router.push(`/teams/${a.entityId}`);
             }}
