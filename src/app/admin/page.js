@@ -15,7 +15,7 @@ const AdminPage = () => {
     const newTeams = teams.filter((t) => t.entityId !== team.entityId);
     setTeams(newTeams);
     localStorage.setItem("teams", JSON.stringify(newTeams));
-    message.success("Team deleted");
+    message.success("Takım başarıyla silindi");
   };
 
   const showTeamModal = () => {

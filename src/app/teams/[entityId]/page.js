@@ -15,7 +15,7 @@ const TeamInfoPage = () => {
     const newPlayers = players.filter((p) => p.personId !== player.personId);
     setPlayers(newPlayers);
     localStorage.setItem("players", JSON.stringify(newPlayers));
-    message.success("Player deleted");
+    message.success("Oyuncu başarıyla silindi");
   };
 
   const showPlayerModal = () => {
