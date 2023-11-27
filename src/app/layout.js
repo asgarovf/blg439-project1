@@ -6,7 +6,8 @@ import { store } from "./store";
 import { useEffect } from "react";
 import { setClocks, setMatches } from "./store/matchSlicer";
 import { Sidebar } from "./components/sidebar";
-import { getPopulatedTeams } from "./data/teams";
+import { getPopulatedTeams, teams } from "./data/teams";
+import { players } from "./data/players";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -65,7 +66,15 @@ const MatchSetter = () => {
 const ClockIntervalHandler = () => {
   const dispatch = useDispatch();
   const clocks = useSelector((state) => state.matchSlicer.clocks);
-  const matches = useSelector((state) => state.matchSlicer.matches);
+
+  useEffect(() => {
+    if (localStorage.getItem("players") == null) {
+      localStorage.setItem("players", JSON.stringify(players));
+    }
+    if (localStorage.getItem("teams") == null) {
+      localStorage.setItem("teams", JSON.stringify(teams));
+    }
+  }, []);
 
   useEffect(() => {
     const cachedClocks = localStorage.getItem("clocks");

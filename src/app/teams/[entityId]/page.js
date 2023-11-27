@@ -13,8 +13,11 @@ const TeamInfoPage = () => {
 
   const handleDelete = (player) => {
     const newPlayers = players.filter((p) => p.personId !== player.personId);
+    const newAllPlayers = getPopulatedPlayers().filter(
+      (p) => p.personId !== player.personId
+    );
     setPlayers(newPlayers);
-    localStorage.setItem("players", JSON.stringify(newPlayers));
+    localStorage.setItem("players", JSON.stringify(newAllPlayers));
     message.success("Oyuncu başarıyla silindi");
   };
 
