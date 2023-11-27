@@ -3,7 +3,7 @@ import { Field } from "@/app/components/field";
 import { Stats } from "@/app/components/stats";
 import { Timeline } from "@/app/components/timeline";
 import { eventOptions } from "@/app/const";
-import { players } from "@/app/data/players";
+import { getPopulatedPlayers } from "@/app/data/players";
 import { addEvent, toggleClock } from "@/app/store/matchSlicer";
 import { calculateEventTime } from "@/app/utils/calculateEventTime";
 import { getTeamScoresFromPBP } from "@/app/utils/getTeamScoresFromPBP";
@@ -38,11 +38,7 @@ export default function Match() {
   const competitor1 = matchData.fixture.competitors[0];
   const competitor2 = matchData.fixture.competitors[1];
   const periodData = matchData.periodData;
-  const periodLabels = periodData.periodLabels;
   const teamScoreKeys = Object.keys(periodData.teamScores);
-  const teamScoresArray = teamScoreKeys.map((key) => {
-    return periodData.teamScores[key];
-  });
 
   const teamScoresFromPBP = getTeamScoresFromPBP(matchData.pbp);
 
@@ -51,6 +47,7 @@ export default function Match() {
   };
 
   const getAwayPlayerOptions = () => {
+    console.log(matchData.statistics);
     return matchData.statistics.away.persons;
   };
 
@@ -76,7 +73,7 @@ export default function Match() {
     if (player == null) {
       return null;
     }
-    return players.find((item) => item.personId === player);
+    return getPopulatedPlayers().find((item) => item.personId === player);
   }, [player]);
 
   const clockDataForMatch = clocks?.[matchData?.seasonId];
@@ -348,11 +345,15 @@ export default function Match() {
 
           <div className="flex items-center space-x-10 mt-4">
             <div className="text-4xl font-medium">
-              {teamScoresFromPBP[competitor1.entityId] ?? competitor1.score}
+              {teamScoresFromPBP[competitor1.entityId] ??
+                competitor1.score ??
+                0}
             </div>
             <div className="text-4xl font-medium">-</div>
             <div className="text-4xl font-medium">
-              {teamScoresFromPBP[competitor2.entityId] ?? competitor2.score}
+              {teamScoresFromPBP[competitor2.entityId] ??
+                competitor2.score ??
+                0}
             </div>
           </div>
 

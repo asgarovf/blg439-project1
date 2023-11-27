@@ -1,8 +1,7 @@
 import { List, Tabs } from "antd";
-import { players } from "../data/players";
+import { getPopulatedPlayers, players } from "../data/players";
 import {
   getPBPEvents,
-  getTeamScoresFromPBP,
   getTeamScoresFromPBPEvents,
 } from "../utils/getTeamScoresFromPBP";
 
@@ -59,7 +58,7 @@ const ListView = ({ match, events }) => {
         const logo = competitor?.logo;
         const index = competitor?.index;
 
-        const person = players.find((person) => {
+        const person = getPopulatedPlayers().find((person) => {
           return person.personId === item.personId;
         });
 

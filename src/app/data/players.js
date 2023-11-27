@@ -1028,3 +1028,15 @@ export const players = [
     statistics: {},
   },
 ];
+
+export const getPopulatedPlayers = () => {
+  try {
+    if (localStorage.getItem("players") == null) {
+      return players;
+    } else {
+      return JSON.parse(localStorage.getItem("players"));
+    }
+  } catch {
+    return players;
+  }
+};

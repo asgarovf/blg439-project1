@@ -1,7 +1,5 @@
 import { Table } from "antd";
-import { players } from "../data/players";
-import { useEffect, useMemo } from "react";
-import { getTeamScoresFromPBP } from "../utils/getTeamScoresFromPBP";
+import { useMemo } from "react";
 
 export const headers = [
   {
@@ -208,7 +206,8 @@ export const Stats = ({ match }) => {
             ? ((newPointsTwoMade / newPointsTwoAttempted) * 100).toFixed(2)
             : 0;
 
-        const newFieldGoalsAttempted = player.statistics.fieldGoalsAttempted + 1;
+        const newFieldGoalsAttempted =
+          player.statistics.fieldGoalsAttempted + 1;
         const newFieldGoalsMade = event.success
           ? player.statistics.fieldGoalsMade + 1
           : player.statistics.fieldGoalsMade;
@@ -224,7 +223,9 @@ export const Stats = ({ match }) => {
           fieldGoalsAttempted: newFieldGoalsAttempted,
           pointsTwoMade: newPointsTwoMade,
           fieldGoalsMade: newFieldGoalsMade,
-          points: event.success ? player.statistics.points + 2 : player.statistics.points,
+          points: event.success
+            ? player.statistics.points + 2
+            : player.statistics.points,
           pointsTwoPercentage: pointsTwoPercentage,
           fieldGoalsPercentage: fieldGoalsPercentage,
         };
@@ -232,12 +233,14 @@ export const Stats = ({ match }) => {
         event.desc.includes("Üç Sayı") ||
         event.desc.includes("3 Sayı")
       ) {
-        const newPointsThreeAttempted = player.statistics.pointsThreeAttempted + 1;
+        const newPointsThreeAttempted =
+          player.statistics.pointsThreeAttempted + 1;
         const newPointsThreeMade = event.success
           ? player.statistics.pointsThreeMade + 1
           : player.statistics.pointsThreeMade;
 
-        const newFieldGoalsAttempted = player.statistics.fieldGoalsAttempted + 1;
+        const newFieldGoalsAttempted =
+          player.statistics.fieldGoalsAttempted + 1;
         const newFieldGoalsMade = event.success
           ? player.statistics.fieldGoalsMade + 1
           : player.statistics.fieldGoalsMade;
@@ -258,11 +261,12 @@ export const Stats = ({ match }) => {
           fieldGoalsAttempted: newFieldGoalsAttempted,
           pointsThreeMade: newPointsThreeMade,
           fieldGoalsMade: newFieldGoalsMade,
-          points: event.success ? player.statistics.points + 3 : player.statistics.points,
+          points: event.success
+            ? player.statistics.points + 3
+            : player.statistics.points,
           pointsThreePercentage: pointsThreePercentage,
           fieldGoalsPercentage: fieldGoalsPercentage,
         };
-
       } else if (event.desc.includes("Serbest Atış")) {
         const newFreeThrowsMade = event.success
           ? player.statistics.freeThrowsMade + 1

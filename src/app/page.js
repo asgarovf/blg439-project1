@@ -1,60 +1,35 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { Button, Input, Modal, Select, Typography } from "antd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import { addNewMatch, buildMatch } from "./store/matchSlicer";
-import { players } from "./data/players";
-import { teams } from "./data/teams";
+import { getPopulatedPlayers, players } from "./data/players";
+import { getPopulatedTeams, teams } from "./data/teams";
 import { getTeamScoresFromPBP } from "./utils/getTeamScoresFromPBP";
 
 export default function Home() {
   const matchList = useSelector((state) => state.matchSlicer.matches);
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
-  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
-  // const [newTeamData, setNewTeamData] = useState({
-  //   entityId: uuidv4(),
-  //   name: null,
-  //   logo: "https://www.espn.com/i/teamlogos/soccer/500/default-team-logo-500.png?h=100&w=100",
-  // });
-
-  // const [newPlayerData, setNewPlayerData] = useState({
-  //   isCustom: true,
-  //   active: false,
-  //   bib: null,
-  //   entityId: null,
-  //   personId: uuidv4(),
-  //   personImage:
-  //     "https://static.vecteezy.com/system/resources/previews/004/511/281/original/default-avatar-photo-placeholder-profile-picture-vector.jpg",
-  //   personName: null,
-  //   starter: null,
-  //   statistics: {},
-  // });
-
   const [team1, setTeam1] = useState(null);
   const [team2, setTeam2] = useState(null);
   const [venue, setVenue] = useState("");
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    localStorage.setItem("players", JSON.stringify(players));
-    localStorage.setItem("teams", JSON.stringify(teams));
-  }, []);
-
   const buildInitialMatchData = () => {
-    const home = teams.find((item) => {
+    const populatedTeams = getPopulatedTeams();
+    const home = populatedTeams.find((item) => {
       return item.entityId == team1;
     });
-    const away = teams.find((item) => item.entityId == team2);
+    const away = populatedTeams.find((item) => item.entityId == team2);
 
-    const homePersons = players.filter((item) => {
+    const homePersons = getPopulatedPlayers().filter((item) => {
       return item.entityId === home.entityId;
     });
 
-    const awayPersons = players.filter((item) => {
+    const awayPersons = getPopulatedPlayers().filter((item) => {
       return item.entityId === away.entityId;
     });
 
@@ -157,27 +132,9 @@ export default function Home() {
     return matchData;
   };
 
-  const getTeamOptions = teams.map((team) => {
+  const getTeamOptions = getPopulatedTeams().map((team) => {
     return { label: team.name, value: team.entityId };
   });
-
-  const buildNewPlayer = () => {
-    const localPlayers = JSON.parse(localStorage.getItem("players"));
-    const updatedPlayers = [...localPlayers, newPlayerData];
-    localStorage.setItem("players", JSON.stringify(updatedPlayers));
-
-    setIsPlayerModalOpen(false);
-  };
-
-  const buildNewTeam = () => {
-    const localTeams = JSON.parse(localStorage.getItem("teams"));
-    console.log("Local Teams", localTeams);
-    console.log("New Team Data", newTeamData);
-    const updatedTeams = [...localTeams, newTeamData];
-    console.log("Updated Teams", updatedTeams);
-    localStorage.setItem("teams", JSON.stringify(updatedTeams));
-    setIsTeamModalOpen(false);
-  };
 
   return (
     <main className="flex w-full h-screen overflow-auto flex-col items-center justify-between p-24 pt-10">
@@ -254,9 +211,9 @@ export default function Home() {
         const competitor2 = fixture.competitors[1];
 
         const competitor1Score =
-          teamScoresFromPBP[competitor1.entityId] ?? competitor1?.score;
+          teamScoresFromPBP[competitor1.entityId] ?? competitor1?.score ?? 0;
         const competitor2Score =
-          teamScoresFromPBP[competitor2.entityId] ?? competitor2?.score;
+          teamScoresFromPBP[competitor2.entityId] ?? competitor2?.score ?? 0;
 
         return (
           <div

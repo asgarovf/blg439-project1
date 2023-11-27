@@ -3,18 +3,18 @@ import { React, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Modal, Input, Form, Popconfirm, message, Table } from "antd";
 import { v4 as uuidv4 } from "uuid";
-import { teams as initialTeams } from "../data/teams";
+import { getPopulatedTeams, teams as initialTeams } from "../data/teams";
 
 const AdminPage = () => {
   const router = useRouter();
   const [isTeamModalOpen, setisTeamModalOpen] = useState(false);
   const [form] = Form.useForm();
+  const [teams, setTeams] = useState([]);
 
-  const handleDelete = (team) => (event) => {
-    event.stopPropagation();
-    setTeams((prevTeams) =>
-      prevTeams.filter((t) => t.entityId !== team.entityId)
-    );
+  const handleDelete = (team) => {
+    const newTeams = teams.filter((t) => t.entityId !== team.entityId);
+    setTeams(newTeams);
+    localStorage.setItem("teams", JSON.stringify(newTeams));
     message.success("Team deleted");
   };
 
@@ -32,7 +32,9 @@ const AdminPage = () => {
           name: values.teamName,
           logo: "https://www.espn.com/i/teamlogos/soccer/500/default-team-logo-500.png?h=100&w=100",
         };
-        setTeams((prevTeams) => [...prevTeams, newTeam]);
+        const newTeams = [...getPopulatedTeams(), newTeam];
+        setTeams(newTeams);
+        localStorage.setItem("teams", JSON.stringify(newTeams));
         setisTeamModalOpen(false);
       })
       .catch((info) => {
@@ -44,21 +46,15 @@ const AdminPage = () => {
     setisTeamModalOpen(false);
   };
 
-  const [teams, setTeams] = useState([]);
-
   useEffect(() => {
     const storedTeams = localStorage.getItem("teams");
-    if (storedTeams) {
+    if (storedTeams != null) {
       setTeams(JSON.parse(storedTeams));
     } else {
       setTeams(initialTeams);
       localStorage.setItem("teams", JSON.stringify(initialTeams));
     }
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem("teams", JSON.stringify(teams));
-  }, [teams]);
 
   const dataSource = teams.map((item) => {
     return item;
@@ -109,11 +105,14 @@ const AdminPage = () => {
       dataIndex: "actions",
       key: "actions",
       align: "right",
-      render: (text, a, b) => {
+      render: (_, a) => {
         return (
           <Popconfirm
             title="Takımı silmek istediğine emin misin?"
-            onConfirm={(event) => handleDelete(team)(event)} // Pass event to handleDelete
+            onConfirm={(event) => {
+              event.stopPropagation();
+              handleDelete(a);
+            }} // Pass event to handleDelete
             okText="Evet"
             cancelText="Hayır"
           >
@@ -130,7 +129,7 @@ const AdminPage = () => {
     <main className="flex items-center w-full h-[90vh] overflow-auto flex-col p-24 pt-10">
       <Modal
         title="Takım Ekle"
-        visible={isTeamModalOpen}
+        open={isTeamModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
       >
@@ -152,36 +151,6 @@ const AdminPage = () => {
         </Button>
       </div>
       <div className="w-full max-w-[90%]">
-        {/* {teams.map((team, index) => (
-          <div
-            onClick={() => router.push(`/teams/${team.entityId}`)}
-            key={team.entityId}
-            className="bg-white hover:cursor-pointer hover:bg-gray-50 border-2 border-gray-300 p-4 mb-4 rounded-lg shadow-md"
-          >
-            <div className="flex items-center justify-center my-2">
-              <div className="flex items-center justify-center my-2">
-                <div className="mr-4">
-                  <img
-                    src={team.logo}
-                    alt={`${team.name} Logo`}
-                    className="w-24 h-24 rounded-full"
-                  />
-                </div>
-                <p className="ml-4 text-xl font-semibold">{team.name}</p>
-                <Popconfirm
-                  title="Are you sure to delete this team?"
-                  onConfirm={(event) => handleDelete(team)(event)} // Pass event to handleDelete
-                  okText="Yes"
-                  cancelText="No"
-                >
-                  <Button type="primary" danger>
-                    Delete Team
-                  </Button>
-                </Popconfirm>
-              </div>
-            </div>
-          </div>
-        ))} */}
         <Table pagination={false} dataSource={dataSource} columns={columns} />
       </div>
     </main>

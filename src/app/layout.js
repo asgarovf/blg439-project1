@@ -6,6 +6,7 @@ import { store } from "./store";
 import { useEffect } from "react";
 import { setClocks, setMatches } from "./store/matchSlicer";
 import { Sidebar } from "./components/sidebar";
+import { getPopulatedTeams } from "./data/teams";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -38,7 +39,22 @@ const MatchSetter = () => {
     }
 
     try {
-      dispatch(setMatches(JSON.parse(cachedMatches)));
+      const allMatches = JSON.parse(cachedMatches);
+      const teams = getPopulatedTeams();
+      const allValidMatches = allMatches.filter((match) => {
+        if (
+          teams.find(
+            (team) =>
+              team.entityId === match.fixture.competitors[0].entityId ||
+              team.entityId === match.fixture.competitors[1].entityId
+          ) == null
+        ) {
+          return false;
+        } else {
+          return true;
+        }
+      });
+      dispatch(setMatches(allValidMatches));
     } catch (err) {
       console.log(err);
     }

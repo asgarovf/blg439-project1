@@ -102,3 +102,15 @@ export const teams = [
     secondaryScore: null,
   },
 ];
+
+export const getPopulatedTeams = () => {
+  try {
+    if (localStorage.getItem("teams") == null) {
+      return teams;
+    } else {
+      return JSON.parse(localStorage.getItem("teams"));
+    }
+  } catch {
+    return teams;
+  }
+};

@@ -1,7 +1,7 @@
 import { TeamOutlined, PlaySquareFilled } from "@ant-design/icons";
 import { Menu } from "antd";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const items = [
   {
@@ -29,6 +29,14 @@ export const Sidebar = () => {
       router.push(`/admin`);
     }
   };
+
+  useEffect(() => {
+    if (window.location.pathname === "/") {
+      setCurrent("matches");
+    } else if (window.location.pathname === "/admin") {
+      setCurrent("team");
+    }
+  }, []);
 
   return (
     <Menu
